@@ -1,213 +1,193 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { HashRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { AnimatePresence, motion, useInView } from "framer-motion";
+import { HashRouter, Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "framer-motion";
 import {
-  ArrowLeft,
-  BarChart3,
+  ArrowRight,
   BriefcaseBusiness,
+  Check,
   ChevronRight,
-  CircleUserRound,
-  Clock3,
   Download,
   ExternalLink,
   FileText,
   Github,
-  LineChart,
+  Lock,
   Mail,
   Menu,
-  MonitorSmartphone,
-  PackageCheck,
-  Sparkles,
   Trophy,
   X,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./styles.css";
+import {
+  aboutSteps,
+  careers,
+  contacts,
+  emartData,
+  gsData,
+  navItems,
+  projects,
+  screens,
+  sectionToNav,
+  skillGroups,
+} from "./data";
+import { EASE, Reveal } from "./ui";
 
-const navItems = [
-  { id: "home", label: "HOME" },
-  { id: "about", label: "ABOUT" },
-  { id: "projects", label: "PROJECTS" },
-  { id: "experience", label: "EXPERIENCE" },
-  { id: "skills", label: "SKILLS" },
-  { id: "contact", label: "CONTACT" },
-];
+// Heavy, below-the-fold or route-level code is split out of the first bundle.
+const loadCharts = () => import("./charts");
+const InspectionRateChart = lazy(() => loadCharts().then((m) => ({ default: m.InspectionRateChart })));
+const RingStat = lazy(() => loadCharts().then((m) => ({ default: m.RingStat })));
+const SalesChart = lazy(() => loadCharts().then((m) => ({ default: m.SalesChart })));
+const loadDetail = () => import("./ProjectDetail");
+const ProjectDetail = lazy(loadDetail);
 
-const screenshots = {
-  inspection: "/screens/inspection-app-main.png",
-  summary: "/screens/inspection-summary-kpi.png",
-  dashboard: "/screens/inspection-dashboard-real.png",
-  score: "/screens/inspection-dashboard.png",
-  report: "/screens/report-generator.png",
-  oneOps: "/screens/one-ops.png",
-};
+/* ---------- shared helpers ---------- */
 
-const projects = [
-  {
-    id: "inspection-app",
-    title: "신선상품 검품 시스템",
-    english: "Inspection App",
-    status: "운영중",
-    category: "검품 운영",
-    problem: "검품 기준과 수량, 사진 기록이 흩어져 담당자별 편차가 발생했습니다.",
-    description: "수량 확인, 바코드 기반 검품, 사진 기록, 기준안 연결을 모바일 흐름으로 통합한 현장형 검품 시스템입니다.",
-    tech: ["React", "Vite", "Apps Script", "Ably"],
-    image: screenshots.inspection,
-    gallery: [screenshots.inspection, screenshots.summary],
-    accent: "#2f8cff",
-    result: "검품률 3~5% → 6~8%",
-    metrics: ["SKU 326개 운영 추적", "검품대상 수량 71,289개", "사진/수량 기록 통합"],
-  },
-  {
-    id: "inspection-dashboard",
-    title: "검품 Dashboard",
-    english: "Inspection Dashboard",
-    status: "운영중",
-    category: "검품 운영",
-    problem: "검품 데이터가 쌓여도 당일 운영 판단에 바로 쓰기 어려웠습니다.",
-    description: "신선식품 검품 데이터를 한눈에 확인하고, 협력사별 수행 수준과 SKU 커버리지를 빠르게 판단하는 운영 대시보드입니다.",
-    tech: ["React", "Recharts", "Vercel", "Sheets"],
-    image: screenshots.dashboard,
-    gallery: [screenshots.dashboard, screenshots.score, screenshots.summary],
-    liveUrl: "https://inspection-dashboard-silk.vercel.app/login",
-    accent: "#5b6cff",
-    result: "SKU 680개 중 검품대상 326개 관리",
-    metrics: ["협력사별 수행 수준", "검품률/커버리지 시각화", "운영 리듬 단축"],
-  },
-  {
-    id: "report-generator",
-    title: "보고서 자동 생성기",
-    english: "Report Generator",
-    status: "운영중",
-    category: "업무 효율화",
-    problem: "매일 반복되는 보고서 정리와 공유에 많은 시간이 소요됐습니다.",
-    description: "검품 데이터를 협력사와 파트너 보고서 형태로 자동 정리해 반복 보고 업무를 줄인 도구입니다.",
-    tech: ["Apps Script", "PPT", "Sheets", "Vercel"],
-    image: screenshots.report,
-    gallery: [screenshots.report, screenshots.summary],
-    accent: "#15a76d",
-    result: "일 4시간 절감",
-    metrics: ["반복 보고 자동화", "파트너 공유 속도 개선", "표준 템플릿 정착"],
-  },
-  {
-    id: "one-ops",
-    title: "One Ops",
-    english: "One Ops",
-    status: "기획중",
-    category: "업무 효율화",
-    problem: "정포, 센터, 영업서, 본사를 잇는 운영 맥락이 여러 채널로 분산됐습니다.",
-    description: "통합 운영 팔로업과 액션 로그를 한 곳에서 관리하는 현장 운영 플랫폼 콘셉트입니다.",
-    tech: ["React19", "TypeScript", "Supabase", "Tailwind"],
-    image: screenshots.oneOps,
-    gallery: [screenshots.oneOps, screenshots.dashboard],
-    accent: "#7c5cff",
-    result: "운영 맥락 통합",
-    metrics: ["액션 로그", "이슈 추적", "협업 히스토리"],
-  },
-];
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-const impactCards = [
-  { icon: PackageCheck, label: "GS 검품률", before: "3~5%", after: "6~8%", note: "신선상품 검품 수행률 개선", values: [4, 7], unit: "%" },
-  { icon: BarChart3, label: "GS SKU 커버리지", before: "326 SKU", after: "검품대상 관리", note: "총 SKU 680개 중 핵심 검품대상 326개 추적", values: [326, 680], unit: "SKU" },
-  { icon: Clock3, label: "업무 시간", before: "반복 보고", after: "일 4시간 절감", note: "보고서 자동화 및 데이터 통합", values: [8, 4], unit: "h" },
-  { icon: BarChart3, label: "이마트 즉석조리 일매출", before: "0.5억", after: "0.7억", note: "안성점 매장 동선 개선", values: [0.5, 0.7], unit: "억" },
-  { icon: Trophy, label: "이마트 피자 구독권", before: "21위", after: "1위", note: "화서점 프로모션 기획 및 운영", values: [21, 1], unit: "rank", reverse: true },
-];
+/** Mounts children (lazy charts) only when the block is near the viewport, keeping its height reserved. */
+function Deferred({ height, children }) {
+  const ref = useRef(null);
+  const near = useInView(ref, { once: true, margin: "400px 0px" });
+  return (
+    <div ref={ref} className="deferred" style={{ minHeight: height }}>
+      {near ? <Suspense fallback={null}>{children}</Suspense> : null}
+    </div>
+  );
+}
 
-const skillGroups = [
-  { title: "Product / Operations", items: ["Process Improvement", "Product Planning", "Data Analysis", "Field Operations"] },
-  { title: "Frontend", items: ["React", "TypeScript", "Vite", "Tailwind"] },
-  { title: "Backend / Data", items: ["Apps Script", "Google Sheets", "Supabase", "SQL"] },
-  { title: "Tools", items: ["Git", "GitHub", "Vercel", "Figma", "Notion"] },
-];
+function CountUp({ to, decimals = 0, duration = 1.1 }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
+  const reduce = useReducedMotion();
+  const [value, setValue] = useState(reduce ? to : 0);
 
-function useCountUp(value, active) {
-  const [count, setCount] = useState(0);
   useEffect(() => {
-    if (!active) return;
-    const duration = 900;
-    const start = performance.now();
-    const tick = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
-      setCount(Math.round(value * (1 - Math.pow(1 - progress, 3))));
-      if (progress < 1) requestAnimationFrame(tick);
+    if (reduce) return setValue(to);
+    if (!inView) return undefined;
+    const controls = animate(0, to, { duration, ease: "easeOut", onUpdate: setValue });
+    return () => controls.stop();
+  }, [inView, reduce, to, duration]);
+
+  return (
+    <span ref={ref}>
+      {value.toLocaleString("ko-KR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
+    </span>
+  );
+}
+
+function SectionHeading({ eyebrow, title, desc, tone = "light" }) {
+  return (
+    <header className={`section-heading ${tone}`}>
+      <p className="section-eyebrow">{eyebrow}</p>
+      <h2>{title}</h2>
+      {desc && <p className="section-desc">{desc}</p>}
+    </header>
+  );
+}
+
+/* ---------- header ---------- */
+
+function useActiveSection(enabled) {
+  const [active, setActive] = useState("home");
+  useEffect(() => {
+    if (!enabled) return undefined;
+    const ids = ["home", "projects", "gs-story", "emart-story", "experience", "about", "skills", "contact"];
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const probe = window.innerHeight * 0.35;
+      let current = "home";
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= probe) current = id;
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = "contact";
+      setActive(sectionToNav[current] ?? current);
     };
-    requestAnimationFrame(tick);
-  }, [value, active]);
-  return count;
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [enabled]);
+  return active;
 }
 
 function Header() {
-  const [active, setActive] = useState("home");
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const onHome = location.pathname === "/";
+  const active = useActiveSection(onHome);
 
   useEffect(() => {
-    if (location.pathname !== "/") {
-      setActive("");
-      return;
-    }
-    const observers = navItems.map(({ id }) => {
-      const element = document.getElementById(id);
-      if (!element) return null;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActive(id);
-        },
-        { rootMargin: "-36% 0px -55% 0px", threshold: 0.01 },
-      );
-      observer.observe(element);
-      return observer;
-    });
-    return () => observers.forEach((observer) => observer?.disconnect());
-  }, [location.pathname]);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => setOpen(false), [location.pathname]);
 
   const goTo = (id) => {
     setOpen(false);
-    if (location.pathname !== "/") {
+    if (!onHome) {
       navigate("/");
-      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 80);
+      setTimeout(() => scrollToSection(id), 120);
     } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection(id);
     }
   };
 
+  const solid = scrolled || !onHome || open;
+
   return (
-    <header className="site-header">
-      <button className="brand" onClick={() => goTo("home")} aria-label="홈으로 이동">
-        SEUNGHO CHOI
-      </button>
-      <nav className="desktop-nav" aria-label="주요 메뉴">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            className={active === item.id ? "active" : ""}
-            onClick={() => goTo(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-      <div className="header-actions">
-        <a className="resume-button" href="/seungho-choi-resume.txt" download>
-          이력서 다운로드 <Download size={16} />
-        </a>
-        <button className="menu-button" onClick={() => setOpen((value) => !value)} aria-label="메뉴 열기">
-          {open ? <X size={22} /> : <Menu size={22} />}
+    <header className={`site-header${solid ? " solid" : ""}${open ? " open" : ""}`}>
+      <div className="header-inner">
+        <button className="brand" onClick={() => goTo("home")} aria-label="홈으로 이동">
+          SEUNGHO CHOI
         </button>
+        <nav className="desktop-nav" aria-label="주요 메뉴">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              className={onHome && active === item.id ? "active" : ""}
+              aria-current={onHome && active === item.id ? "true" : undefined}
+              onClick={() => goTo(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+        <div className="header-actions">
+          <a className="resume-button" href={contacts.resume} download>
+            RESUME <span className="resume-ko">/ 소개서</span> <Download size={15} />
+          </a>
+          <button className="menu-button" onClick={() => setOpen((v) => !v)} aria-label={open ? "메뉴 닫기" : "메뉴 열기"} aria-expanded={open}>
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
       <AnimatePresence>
         {open && (
-          <motion.div className="mobile-nav" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+          <motion.div className="mobile-nav" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}>
             {navItems.map((item) => (
-              <button key={item.id} onClick={() => goTo(item.id)}>
+              <button key={item.id} className={onHome && active === item.id ? "active" : ""} onClick={() => goTo(item.id)}>
                 {item.label}
               </button>
             ))}
+            <a href={contacts.resume} download>RESUME / 소개서</a>
           </motion.div>
         )}
       </AnimatePresence>
@@ -215,279 +195,387 @@ function Header() {
   );
 }
 
-function Reveal({ children, className = "" }) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.18 }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function KpiNumber({ target, suffix = "" }) {
-  const ref = React.useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.6 });
-  const count = useCountUp(target, inView);
-  return <span ref={ref}>{count}{suffix}</span>;
-}
+/* ---------- hero ---------- */
 
 function Hero() {
   return (
     <section className="hero" id="home">
-      <div className="hero-bg" aria-hidden="true" />
-      <div className="hero-inner">
+      <div className="hero-glow" aria-hidden="true" />
+      <div className="wrap hero-inner">
         <div className="hero-copy">
-          <p className="eyebrow">Product · Operations · Retail · Developer</p>
+          <p className="hero-eyebrow">Product · Operations · Retail · Developer</p>
           <h1>
-            현장의 문제를
-            <strong>데이터와 제품</strong>으로
-            해결합니다.
+            <span>현장의 문제를</span>
+            <span className="accent">데이터와 제품으로</span>
+            <span>해결합니다.</span>
           </h1>
           <p className="hero-sub">
-            리테일 현장에서 발견한 비효율을 그냥 두지 않고, 직접 시스템을 만들어 운영까지 연결해온 최승호입니다.
+            리테일 현장에서 발견한 비효율을 그냥 두지 않고,{" "}
+            <br />
+            직접 시스템을 만들어 운영까지 연결해온 최승호입니다.
           </p>
           <div className="hero-cta">
-            <button onClick={() => document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })}>
-              프로젝트 둘러보기 <ChevronRight size={18} />
+            <button className="btn primary" onClick={() => scrollToSection("projects")}>
+              PROJECTS <ChevronRight size={18} />
             </button>
-            <a href="/seungho-choi-resume.txt" download>
-              소개서 보기 <FileText size={18} />
-            </a>
+            <button className="btn ghost" onClick={() => scrollToSection("about")}>ABOUT ME</button>
           </div>
         </div>
-        <div className="device-stage" aria-label="Inspection App 프로젝트 화면 미리보기">
-          <div className="desktop-product-frame">
-            <div className="frame-dots"><span /><span /><span /></div>
-            <img src={screenshots.dashboard} alt="Inspection Dashboard 화면" />
-          </div>
-          <div className="mobile-product-frame">
-            <img src={screenshots.inspection} alt="Inspection App 모바일 화면" />
-          </div>
-          <div className="floating-note">
-            <Sparkles size={18} />
-            <span>Dashboard · App · Report를 하나의 운영 흐름으로 연결</span>
-          </div>
-        </div>
+        <HeroMockup />
       </div>
       <HeroKpi />
     </section>
   );
 }
 
-function HeroKpi() {
-  const items = [
-    { label: "검품률 향상", value: "3~5% → 6~8%", icon: LineChart },
-    { label: "업무시간 절감", value: "일 4시간", icon: Clock3 },
-    { label: "리테일 경력", value: "8년+", icon: CircleUserRound },
-    { label: "직접 구축한 제품", value: "검품앱 · 대시보드 · 보고서 · One Ops", icon: MonitorSmartphone },
-  ];
+function BrowserFrame({ className, label, src, alt, delay = 0 }) {
+  const reduce = useReducedMotion();
   return (
-    <div className="hero-kpi">
-      {items.map((item) => {
-        const Icon = item.icon;
-        return (
-          <div className="hero-kpi-item" key={item.label}>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
-            <Icon size={27} />
-          </div>
-        );
-      })}
+    <motion.figure
+      className={`browser-frame ${className}`}
+      initial={reduce ? false : { opacity: 0, y: 28 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay, ease: EASE }}
+    >
+      <figcaption className="frame-bar">
+        <i /><i /><i />
+        <span>{label}</span>
+      </figcaption>
+      <img src={src} alt={alt} decoding="async" />
+    </motion.figure>
+  );
+}
+
+function HeroMockup() {
+  return (
+    <div className="hero-mockup" role="group" aria-label="Inspection App, Inspection Dashboard, Report Generator 실제 화면">
+      <BrowserFrame className="frame-dashboard" label="Inspection Dashboard" src={screens.dashboardLogin} alt="Inspection Dashboard 로그인 화면" delay={0.1} />
+      <BrowserFrame className="frame-report" label="Report Generator" src={screens.reportGenerator} alt="Report Generator 화면" delay={0.25} />
+      <BrowserFrame className="frame-app" label="Inspection App" src={screens.inspectionApp} alt="Inspection App 화면" delay={0.4} />
     </div>
   );
 }
 
-function SectionHeading({ eyebrow, title, desc, dark = false }) {
+function HeroKpi() {
   return (
-    <div className={`section-heading ${dark ? "dark" : ""}`}>
-      <p>{eyebrow}</p>
-      <h2>{title}</h2>
-      {desc && <span>{desc}</span>}
+    <div className="wrap hero-kpi-wrap">
+      <dl className="hero-kpi">
+        <div className="kpi-item">
+          <dt>검품률 향상</dt>
+          <dd className="kpi-value">
+            <span>3~5%</span>
+            <ArrowRight size={22} className="kpi-arrow" aria-hidden="true" />
+            <span className="blue">6~8%</span>
+          </dd>
+        </div>
+        <div className="kpi-item">
+          <dt>업무시간 절감</dt>
+          <dd className="kpi-value">
+            <span>일</span> <span className="blue"><CountUp to={4} /></span>
+            <span className="unit">시간</span>
+          </dd>
+        </div>
+        <div className="kpi-item">
+          <dt>리테일 경력</dt>
+          <dd className="kpi-value">
+            <span><CountUp to={8} /></span>
+            <span className="unit">년+</span>
+          </dd>
+        </div>
+        <div className="kpi-item">
+          <dt>직접 구축 제품</dt>
+          <dd className="kpi-value">
+            <span>4</span>
+            <span className="unit">개</span>
+            <small>Inspection App · Dashboard<br />Report Generator · One Ops</small>
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }
+
+/* ---------- projects ---------- */
 
 function ProjectsSection() {
-  const filters = ["전체", "검품 운영", "업무 효율화"];
-  const [filter, setFilter] = useState("전체");
-  const filtered = filter === "전체" ? projects : projects.filter((project) => project.category === filter);
   return (
     <section className="section projects-section" id="projects">
-      <SectionHeading eyebrow="Featured Projects" title="주요 프로젝트" desc="현장의 실제 문제를 해결한 제품들입니다." />
-      <div className="filter-row">
-        {filters.map((item) => (
-          <button key={item} className={filter === item ? "selected" : ""} onClick={() => setFilter(item)}>
-            {item}
-          </button>
-        ))}
-      </div>
-      <motion.div className="project-grid" layout>
-        <AnimatePresence mode="popLayout">
-          {filtered.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+      <div className="wrap">
+        <SectionHeading eyebrow="Featured Projects" title="직접 만든 4개의 제품" desc="현장의 실제 문제를 정의하고, 설계부터 운영까지 직접 맡은 제품들입니다." />
+        <div className="project-grid">
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} />
           ))}
-        </AnimatePresence>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }
 
-function ProjectCard({ project }) {
+function ProjectCard({ project, index }) {
   return (
-    <motion.article className="project-card" layout initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}>
-      <Link className="project-image" to={`/projects/${project.id}`} aria-label={`${project.title} 상세 보기`}>
-        <span className="status-badge" style={{ "--badge": project.accent }}>{project.status}</span>
-        <img src={project.image} alt={`${project.title} 스크린샷`} />
+    <Reveal className="project-card" delay={(index % 2) * 0.08}>
+      <Link className="project-shot" to={`/projects/${project.id}`} aria-label={`${project.title} 상세 보기`}>
+        <span className="status-badge" style={{ "--badge": project.accent }}>
+          <i /> {project.status}
+        </span>
+        <div className="shot-frame">
+          <div className="frame-bar light"><i /><i /><i /><span>{project.english}</span></div>
+          <img src={project.image} alt={project.imageAlt} loading="lazy" decoding="async" />
+        </div>
+        {project.imageNote && <span className="image-note">{project.imageNote}</span>}
       </Link>
       <div className="project-body">
-        <div>
-          <h3>{project.title}</h3>
-          <p className="english">{project.english}</p>
+        <div className="project-head">
+          <div>
+            <h3>{project.title}</h3>
+            <p className="english">{project.english}</p>
+          </div>
+          <span className="project-result" style={{ "--badge": project.accent }}>{project.result}</span>
         </div>
-        <p className="problem">{project.problem}</p>
-        <p>{project.description}</p>
-        <div className="tech-stack">
-          {project.tech.map((tech) => <span key={tech}>{tech}</span>)}
-        </div>
+        <p className="one-line">{project.oneLine}</p>
+        <dl className="project-facts">
+          <div><dt>Problem</dt><dd>{project.problem}</dd></div>
+          <div><dt>Purpose</dt><dd>{project.purpose}</dd></div>
+        </dl>
+        <ul className="tech-stack">{project.tech.map((t) => <li key={t}>{t}</li>)}</ul>
         <div className="card-actions">
           {project.liveUrl ? (
-            <a href={project.liveUrl} target="_blank" rel="noreferrer">
-              Live Demo <ExternalLink size={15} />
-            </a>
+            <a className="btn dark" href={project.liveUrl} target="_blank" rel="noreferrer">Live Demo <ExternalLink size={15} /></a>
           ) : (
-            <button onClick={() => toast.info("데모 URL이 연결되면 이 버튼에서 바로 열 수 있습니다.")}>
-              Live Demo <ExternalLink size={15} />
+            <button className="btn dark muted" onClick={() => toast.info(project.demoNote)} aria-label={`${project.title} Live Demo 안내`}>
+              Live Demo <Lock size={14} />
             </button>
           )}
-          <Link to={`/projects/${project.id}`}>
-            Case Study
-          </Link>
+          <Link className="btn outline" to={`/projects/${project.id}`} onPointerEnter={loadDetail}>Case Study <ArrowRight size={15} /></Link>
         </div>
       </div>
-    </motion.article>
+    </Reveal>
   );
 }
 
-function ImpactSection() {
+/* ---------- charts ---------- */
+
+function GSDataStorySection() {
+  const skuPct = Number(((gsData.sku.target / gsData.sku.total) * 100).toFixed(1));
+  const qtyPct = Number(((gsData.quantity.target / gsData.quantity.total) * 100).toFixed(1));
+
   return (
-    <section className="section impact-section">
-      <SectionHeading eyebrow="Results / Impact" title="주요 성과" desc="GS리테일 검품 운영 지표와 이마트 매장 운영 성과를 숫자와 그래프로 정리했습니다." />
-      <div className="impact-grid">
-        {impactCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Reveal className="impact-card" key={card.label}>
-              <div className="impact-title">
-                <Icon size={26} />
-                <p>{card.label}</p>
-              </div>
-              <strong><span>{card.before}</span> → <b>{card.after}</b></strong>
-              <MetricBars values={card.values} reverse={card.reverse} />
-              <small>{card.note}</small>
+    <section className="section data-story gs-story" id="gs-story">
+      <div className="wrap">
+        <SectionHeading eyebrow="GS Retail · Data Story" title="현장 문제에서 수치 개선까지" desc="GS리테일 신선강화지원팀에서 검품 운영을 제품으로 바꾼 과정입니다." />
+
+        <ol className="story-flow">
+          {gsData.flow.map((item, i) => (
+            <Reveal as="li" key={item.step} className={`flow-step${i === gsData.flow.length - 1 ? " last" : ""}`} delay={i * 0.07}>
+              <span className="flow-no">{item.step}</span>
+              <strong>{item.title}</strong>
+              <p>{item.body}</p>
             </Reveal>
-          );
-        })}
+          ))}
+        </ol>
+
+        <div className="story-grid gs-grid">
+          <Reveal className="story-card span-5">
+            <div className="story-head">
+              <span>검품률 · Before / After</span>
+              <strong>3~5% <ArrowRight size={22} /> <em>6~8%</em></strong>
+            </div>
+            <Deferred height={250}><InspectionRateChart /></Deferred>
+            <p className="story-note">구간(범위)으로 표기한 운영 수치입니다.</p>
+          </Reveal>
+
+          <Reveal className="story-card span-3 time-card" delay={0.08}>
+            <div className="story-head">
+              <span>업무시간 절감</span>
+              <strong><em>일 <CountUp to={gsData.hoursSaved} />시간</em></strong>
+            </div>
+            <div className="time-flow" aria-label="수기 취합에서 자동 보고서 생성으로">
+              <div className="time-node before">
+                <small>Before</small>
+                <b>수기 취합 · 서식 정리</b>
+              </div>
+              <div className="time-arrow"><span>−<CountUp to={gsData.hoursSaved} />h / day</span></div>
+              <div className="time-node after">
+                <small>After</small>
+                <b>Report Generator 자동 생성</b>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal className="story-card span-4" delay={0.16}>
+            <div className="story-head">
+              <span>검품 대상 범위</span>
+              <strong><CountUp to={gsData.sku.target} /> / {gsData.sku.total}<small> SKU</small></strong>
+            </div>
+            <div className="ring-list">
+              <Deferred height={112}>
+                <RingStat value={skuPct} label="검품대상 SKU" caption={`총 SKU ${gsData.sku.total}개 중 ${gsData.sku.target}개`} />
+              </Deferred>
+              <Deferred height={112}>
+                <RingStat value={qtyPct} label="검품대상 수량" caption={`총 ${gsData.quantity.total.toLocaleString()}개 중 ${gsData.quantity.target.toLocaleString()}개`} />
+              </Deferred>
+            </div>
+            <p className="story-note">검품앱 7/29 화면 기준입니다. 검품 대상 비중이며, 검품 진행률(커버리지)과는 다른 값입니다.</p>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
 }
 
-function MetricBars({ values, reverse = false }) {
-  const max = Math.max(...values);
-  const normalized = values.map((value) => {
-    if (reverse) return value === Math.min(...values) ? 100 : Math.max(16, 100 - (value / max) * 70);
-    return Math.max(16, (value / max) * 100);
-  });
+function RankTrack() {
+  const { from, to, total } = emartData.rank;
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const reduce = useReducedMotion();
+  const ranks = Array.from({ length: total }, (_, i) => total - i); // 21 ... 1 (left → right)
   return (
-    <div className="metric-bars" aria-hidden="true">
-      {normalized.map((width, index) => (
-        <span key={`${width}-${index}`} style={{ "--bar-width": `${width}%` }} />
-      ))}
+    <div className="rank-track" ref={ref} role="img" aria-label={`피자 구독권 순위 ${from}위에서 ${to}위로 상승`}>
+      <div className="rank-line">
+        <motion.span
+          className="rank-fill"
+          initial={reduce ? false : { scaleX: 0 }}
+          animate={inView || reduce ? { scaleX: 1 } : { scaleX: 0 }}
+          transition={{ duration: 1.1, ease: EASE }}
+        />
+        {ranks.map((r) => (
+          <i key={r} className={r === from ? "dot start" : r === to ? "dot end" : "dot"} />
+        ))}
+      </div>
+      <div className="rank-labels">
+        <span><small>Before</small><b>{from}위</b></span>
+        <span className="end"><Trophy size={18} aria-hidden="true" /><small>After</small><b>{to}위</b></span>
+      </div>
     </div>
   );
 }
 
+function OpeningTimeline() {
+  return (
+    <ol className="open-timeline">
+      {emartData.openings.map((item, i) => (
+        <li key={item.store}>
+          <span className="node">{i + 1}</span>
+          <strong>{item.store}</strong>
+          <small>{item.note}</small>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function EmartStorySection() {
+  const increase = Math.round(((0.7 - 0.5) / 0.5) * 100);
+  return (
+    <section className="section data-story emart-story" id="emart-story">
+      <div className="wrap">
+        <SectionHeading eyebrow="Emart Traders · Results" title="8년+ 현장에서 만든 성과" desc="매출 활성화, 프로모션 순위 상승, 신규점 오픈 경험을 GS리테일 성과와 분리해 보여드립니다." />
+        <div className="story-grid emart-grid">
+          <Reveal className="story-card span-5">
+            <div className="story-head">
+              <span>즉석조리 일매출</span>
+              <strong>0.5억 <ArrowRight size={22} /> <em>0.7억</em></strong>
+            </div>
+            <Deferred height={250}><SalesChart /></Deferred>
+            <p className="story-note"><b className="pill">+{increase}%</b> 즉석조리 일매출 상승폭</p>
+          </Reveal>
+
+          <Reveal className="story-card span-4" delay={0.08}>
+            <div className="story-head">
+              <span>피자 구독권 순위</span>
+              <strong>21위 <ArrowRight size={22} /> <em>1위</em></strong>
+            </div>
+            <RankTrack />
+            <p className="story-note">화서점 피자 구독권 실적 순위를 21단계 끌어올렸습니다.</p>
+          </Reveal>
+
+          <Reveal className="story-card span-3" delay={0.16}>
+            <div className="story-head">
+              <span>신규점 오픈</span>
+              <strong><em>3</em>개점</strong>
+            </div>
+            <OpeningTimeline />
+            <p className="story-note">구월 · 화서 · 안성 오픈 경험</p>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- experience / about / skills / contact ---------- */
+
 function ExperienceSection() {
-  const careers = [
-    {
-      company: "GS리테일",
-      period: "2024.02 - 현재",
-      logo: "GS",
-      metrics: [
-        { label: "검품률", from: "3~5%", to: "6~8%" },
-        { label: "SKU", from: "총 680", to: "대상 326" },
-        { label: "절감", from: "수기 보고", to: "일 4h" },
-      ],
-      bullets: ["신선강화지원팀", "검품 시스템 구축 및 기준안 수립", "검품률 3~5% → 6~8%, 일 4시간 절감", "대시보드/보고서 생성기 운영", "H-100F 비파괴 당도계 연동"],
-    },
-    {
-      company: "이마트 트레이더스",
-      period: "2016 - 2023",
-      logo: "emart",
-      metrics: [
-        { label: "즉석조리", from: "0.5억", to: "0.7억" },
-        { label: "피자 구독권", from: "21위", to: "1위" },
-        { label: "신규 오픈", from: "3개점", to: "운영 안정화" },
-      ],
-      bullets: ["8년+ 리테일 현장 경험", "3개점 신규 오픈 참여", "화서점 피자 구독권 21위 → 1위", "안성점 즉석조리 일매출 0.5억 → 0.7억", "매출, 재고, 동선, 프로모션 개선"],
-    },
-  ];
   return (
     <section className="section experience-section" id="experience">
-      <SectionHeading eyebrow="Experience" title="경력 및 주요 경험" desc="직책보다 문제를 발견하고 해결한 흐름을 중심으로 정리했습니다." />
-      <div className="career-grid">
-        {careers.map((career) => (
-          <Reveal className="career-card" key={career.company}>
-            <div className="career-main">
-              <div className="career-logo">{career.logo}</div>
-              <div>
-                <h3>{career.company}</h3>
-                <p>{career.period}</p>
-                <ul>
-                  {career.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
+      <div className="wrap">
+        <SectionHeading eyebrow="Experience" title="역할과 성과로 읽는 경력" desc="무엇을 맡았고, 무엇을 만들었고, 어떤 결과를 냈는지를 함께 정리했습니다." />
+        <div className="career-grid">
+          {careers.map((career, i) => (
+            <Reveal className={`career-card ${career.key}`} key={career.key} delay={i * 0.08}>
+              <div className="career-top">
+                <span className="career-mark">{career.mark}</span>
+                <div>
+                  <h3>{career.company}</h3>
+                  <p>{career.team} · {career.period}</p>
+                </div>
+              </div>
+              <p className="career-summary">{career.summary}</p>
+              <ul className="impact-row">
+                {career.impacts.map((impact) => (
+                  <li key={impact.label}>
+                    <strong>{impact.value}</strong>
+                    <span>{impact.label}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="career-cols">
+                <div>
+                  <h4>Role</h4>
+                  <ul className="chip-list">{career.role.map((r) => <li key={r}>{r}</li>)}</ul>
+                  <h4>Built / Owned</h4>
+                  <ul className="chip-list outline">{career.built.map((b) => <li key={b}>{b}</li>)}</ul>
+                </div>
+                <ul className="check-list">
+                  {career.bullets.map((b) => (
+                    <li key={b}><Check size={16} aria-hidden="true" />{b}</li>
+                  ))}
                 </ul>
               </div>
-            </div>
-            <div className="career-metrics" aria-label={`${career.company} 주요 수치`}>
-              {career.metrics.map((metric) => (
-                <div key={metric.label}>
-                  <span>{metric.label}</span>
-                  <strong>{metric.from}</strong>
-                  <small>{metric.to}</small>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        ))}
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 function AboutSection() {
-  const steps = ["관찰", "의심", "데이터 확인", "직접 구현", "현장 검증"];
   return (
     <section className="about-band" id="about">
-      <div className="about-copy">
-        <p className="eyebrow">About Me</p>
-        <h2>저는 현장에서 불편한 걸<br />그냥 두고 못 보는 사람입니다.</h2>
-        <p>
-          관행하고, 의심하고, 데이터를 확인하고, 직접 구현해 현장에서 검증하는 것을 좋아합니다.
-          리테일 운영 경험과 개발 역량을 결합해 지속적으로 개선하는 것이 저의 일하는 방식입니다.
-        </p>
-      </div>
-      <div className="process-line">
-        {steps.map((step, index) => (
-          <Reveal className="process-step" key={step}>
-            <span>0{index + 1}</span>
-            <strong>{step}</strong>
-          </Reveal>
-        ))}
+      <div className="wrap about-inner">
+        <div className="about-copy">
+          <p className="section-eyebrow">About Me</p>
+          <blockquote>
+            “저는 현장에서 불편한 걸
+            <br />
+            그냥 두고 못 보는 사람입니다.”
+          </blockquote>
+          <p>
+            현장의 불편을 관찰하고, 당연한 절차를 의심하고, 데이터를 확인한 뒤 직접 구현해 운영에서 검증합니다.
+            리테일 운영 경험과 개발 역량을 함께 사용해 문제를 끝까지 개선합니다.
+          </p>
+        </div>
+        <ol className="process-line">
+          {aboutSteps.map((step, i) => (
+            <Reveal as="li" className="process-step" key={step.title} delay={i * 0.07}>
+              <span className="step-no">0{i + 1}</span>
+              <strong>{step.title}</strong>
+              <p>{step.body}</p>
+            </Reveal>
+          ))}
+        </ol>
       </div>
     </section>
   );
@@ -496,46 +584,49 @@ function AboutSection() {
 function SkillsSection() {
   return (
     <section className="section skills-section" id="skills">
-      <SectionHeading eyebrow="Skills" title="더 나은 경험을 만들기 위한 꾸준한 성장" desc="현장 운영과 제품 구현을 함께 다룰 수 있도록 역량을 넓혀왔습니다." />
-      <div className="skills-grid">
-        {skillGroups.map((group) => (
-          <Reveal className="skill-card" key={group.title}>
-            <h3>{group.title}</h3>
-            <div>
-              {group.items.map((item) => <span key={item}>{item}</span>)}
-            </div>
-          </Reveal>
-        ))}
+      <div className="wrap">
+        <SectionHeading eyebrow="Skills" title="운영과 개발, 두 가지를 함께" desc="기술 스택보다 현장 문제를 제품으로 옮기는 능력과 구현 역량의 균형을 보여드립니다." />
+        <div className="skills-grid">
+          {skillGroups.map((group, i) => (
+            <Reveal className={`skill-card ${group.key}`} key={group.key} delay={i * 0.06}>
+              <span className="skill-index">0{i + 1}</span>
+              <h3>{group.title}</h3>
+              <p>{group.desc}</p>
+              <ul>{group.items.map((item) => <li key={item}>{item}</li>)}</ul>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 function ContactSection() {
-  const contacts = [
-    { icon: Mail, label: "Email", value: "seungho.choi@example.com" },
-    { icon: Github, label: "GitHub", value: "github.com/chltmdgh1028-svg" },
-    { icon: BriefcaseBusiness, label: "LinkedIn", value: "linkedin.com/in/seungho-choi" },
-    { icon: FileText, label: "Notion", value: "notion.so/seungho-choi" },
-  ];
+  const items = [
+    contacts.email && { icon: Mail, label: "Email", value: contacts.email, href: `mailto:${contacts.email}` },
+    { icon: Github, label: "GitHub", value: contacts.github.replace("https://", ""), href: contacts.github },
+    { icon: ExternalLink, label: "Live Service", value: "Inspection Dashboard", href: contacts.dashboard },
+    contacts.linkedin && { icon: BriefcaseBusiness, label: "LinkedIn", value: contacts.linkedin.replace("https://", ""), href: contacts.linkedin },
+    { icon: FileText, label: "Resume / 소개서", value: "소개서 다운로드", href: contacts.resume, download: true },
+  ].filter(Boolean);
+
   return (
     <section className="contact-section" id="contact">
-      <div>
-        <p className="eyebrow">Contact</p>
-        <h2>현장의 문제를 제품으로 바꾸는 일을 함께하고 싶습니다.</h2>
-        <p>새로운 도전과 협업의 기회를 언제나 열어두고 있습니다. 편하게 연락주세요.</p>
-      </div>
-      <div className="contact-grid">
-        {contacts.map((contact) => {
-          const Icon = contact.icon;
-          return (
-            <button key={contact.label} onClick={() => toast.info(`${contact.label} 링크를 실제 주소로 교체하면 바로 연결됩니다.`)}>
-              <Icon size={22} />
-              <span>{contact.label}</span>
-              <strong>{contact.value}</strong>
-            </button>
-          );
-        })}
+      <div className="wrap contact-inner">
+        <div>
+          <p className="section-eyebrow">Contact</p>
+          <h2>현장의 문제를 제품으로 바꾸는 일을 함께하고 싶습니다.</h2>
+          <p>새로운 도전과 협업의 기회를 열어두고 있습니다.</p>
+        </div>
+        <div className="contact-grid">
+          {items.map(({ icon: Icon, label, value, href, download }) => (
+            <a key={label} href={href} {...(download ? { download: true } : { target: "_blank", rel: "noreferrer" })}>
+              <Icon size={22} aria-hidden="true" />
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </a>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -543,76 +634,20 @@ function ContactSection() {
 
 function HomePage() {
   return (
-    <>
+    <main>
       <Hero />
       <ProjectsSection />
-      <ImpactSection />
+      <GSDataStorySection />
+      <EmartStorySection />
       <ExperienceSection />
       <AboutSection />
       <SkillsSection />
       <ContactSection />
-    </>
-  );
-}
-
-function ProjectDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const project = projects.find((item) => item.id === id) ?? projects[0];
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const gallery = useMemo(() => [
-    ...(project.gallery ?? [project.image]).map((src) => ({ src })),
-  ], [project.gallery, project.image]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }, [id]);
-
-  return (
-    <main className="detail-page">
-      <button className="back-button" onClick={() => navigate("/")}>
-        <ArrowLeft size={18} /> 목록으로 돌아가기
-      </button>
-      <section className="detail-hero">
-        <div>
-          <span className="status-badge" style={{ "--badge": project.accent }}>{project.status}</span>
-          <h1>{project.title}</h1>
-          <p>{project.english}</p>
-          <strong>{project.result}</strong>
-        </div>
-        <button className="detail-shot" onClick={() => setLightboxOpen(true)} aria-label="스크린샷 확대">
-          <img src={project.image} alt={`${project.title} 대표 스크린샷`} />
-        </button>
-      </section>
-      <section className="case-grid">
-        {[
-          ["Problem", project.problem],
-          ["Why", "현장 운영의 문제는 작은 불편에서 시작되지만, 반복되면 비용과 품질 편차로 커집니다."],
-          ["Solution", project.description],
-          ["Process", "현장 관찰, 데이터 기준 정의, 빠른 프로토타입, 담당자 피드백, 운영 적용 순서로 진행했습니다."],
-          ["Architecture", `${project.tech.join(" · ")} 기반으로 입력, 저장, 분석, 보고 흐름을 나눠 설계했습니다.`],
-          ["Result", project.metrics.join(" · ")],
-        ].map(([title, body]) => (
-          <Reveal className="case-card" key={title}>
-            <span>{title}</span>
-            <p>{body}</p>
-          </Reveal>
-        ))}
-      </section>
-      <section className="detail-gallery">
-        <h2>Screenshots</h2>
-        <div>
-          {gallery.map((item, index) => (
-            <button key={item.src} onClick={() => setLightboxOpen(true)}>
-              <img src={item.src} alt={`${project.title} 갤러리 ${index + 1}`} />
-            </button>
-          ))}
-        </div>
-      </section>
-      <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)} slides={gallery} />
     </main>
   );
 }
+
+/* ---------- project detail ---------- */
 
 function App() {
   return (
@@ -620,11 +655,20 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/projects/:id" element={<ProjectDetail />} />
+        <Route
+          path="/projects/:id"
+          element={
+            <Suspense fallback={<div className="detail-page" aria-busy="true" />}>
+              <ProjectDetail />
+            </Suspense>
+          }
+        />
       </Routes>
       <footer className="site-footer">
-        <span>SEUNGHO CHOI</span>
-        <p>© 2026 Seungho Choi. Portfolio Website.</p>
+        <div className="wrap">
+          <span>SEUNGHO CHOI</span>
+          <p>© 2026 Seungho Choi. Portfolio Website.</p>
+        </div>
       </footer>
       <Toaster richColors position="bottom-right" />
     </HashRouter>

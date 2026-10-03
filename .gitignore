@@ -1,2 +1,6 @@
 node_modules/
 .sites-runtime/
+.vite/
+*.log
+*.tar.gz
+.DS_Store
