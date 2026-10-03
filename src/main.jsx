@@ -28,18 +28,19 @@ import "yet-another-react-lightbox/styles.css";
 import "./styles.css";
 
 const navItems = [
-  { id: "home", label: "Home" },
-  { id: "about", label: "About" },
-  { id: "projects", label: "Projects" },
-  { id: "experience", label: "Experience" },
-  { id: "skills", label: "Skills" },
-  { id: "contact", label: "Contact" },
+  { id: "home", label: "HOME" },
+  { id: "about", label: "ABOUT" },
+  { id: "projects", label: "PROJECTS" },
+  { id: "experience", label: "EXPERIENCE" },
+  { id: "skills", label: "SKILLS" },
+  { id: "contact", label: "CONTACT" },
 ];
 
 const screenshots = {
   inspection: "/screens/inspection-app-main.png",
   summary: "/screens/inspection-summary-kpi.png",
-  dashboard: "/screens/inspection-dashboard.png",
+  dashboard: "/screens/inspection-dashboard-real.png",
+  score: "/screens/inspection-dashboard.png",
   report: "/screens/report-generator.png",
   oneOps: "/screens/one-ops.png",
 };
@@ -55,9 +56,10 @@ const projects = [
     description: "수량 확인, 바코드 기반 검품, 사진 기록, 기준안 연결을 모바일 흐름으로 통합한 현장형 검품 시스템입니다.",
     tech: ["React", "Vite", "Apps Script", "Ably"],
     image: screenshots.inspection,
+    gallery: [screenshots.inspection, screenshots.summary],
     accent: "#2f8cff",
     result: "검품률 3~5% → 6~8%",
-    metrics: ["SKU 검품 범위 확대", "사진/수량 기록 통합", "현장 검증 루프 구축"],
+    metrics: ["SKU 326개 운영 추적", "검품대상 수량 71,289개", "사진/수량 기록 통합"],
   },
   {
     id: "inspection-dashboard",
@@ -66,12 +68,14 @@ const projects = [
     status: "운영중",
     category: "검품 운영",
     problem: "검품 데이터가 쌓여도 당일 운영 판단에 바로 쓰기 어려웠습니다.",
-    description: "센터, 협력사, SKU 커버리지와 검품량을 실시간으로 확인하는 운영 대시보드입니다.",
+    description: "신선식품 검품 데이터를 한눈에 확인하고, 협력사별 수행 수준과 SKU 커버리지를 빠르게 판단하는 운영 대시보드입니다.",
     tech: ["React", "Recharts", "Vercel", "Sheets"],
     image: screenshots.dashboard,
+    gallery: [screenshots.dashboard, screenshots.score, screenshots.summary],
+    liveUrl: "https://inspection-dashboard-silk.vercel.app/login",
     accent: "#5b6cff",
-    result: "검품 SKU 2,150개 추적",
-    metrics: ["협력사별 수행 수준", "구간별 점수 시각화", "운영 리듬 단축"],
+    result: "SKU 680개 중 검품대상 326개 관리",
+    metrics: ["협력사별 수행 수준", "검품률/커버리지 시각화", "운영 리듬 단축"],
   },
   {
     id: "report-generator",
@@ -83,6 +87,7 @@ const projects = [
     description: "검품 데이터를 협력사와 파트너 보고서 형태로 자동 정리해 반복 보고 업무를 줄인 도구입니다.",
     tech: ["Apps Script", "PPT", "Sheets", "Vercel"],
     image: screenshots.report,
+    gallery: [screenshots.report, screenshots.summary],
     accent: "#15a76d",
     result: "일 4시간 절감",
     metrics: ["반복 보고 자동화", "파트너 공유 속도 개선", "표준 템플릿 정착"],
@@ -97,6 +102,7 @@ const projects = [
     description: "통합 운영 팔로업과 액션 로그를 한 곳에서 관리하는 현장 운영 플랫폼 콘셉트입니다.",
     tech: ["React19", "TypeScript", "Supabase", "Tailwind"],
     image: screenshots.oneOps,
+    gallery: [screenshots.oneOps, screenshots.dashboard],
     accent: "#7c5cff",
     result: "운영 맥락 통합",
     metrics: ["액션 로그", "이슈 추적", "협업 히스토리"],
@@ -104,10 +110,11 @@ const projects = [
 ];
 
 const impactCards = [
-  { icon: PackageCheck, label: "검품률", before: "3~5%", after: "6~8%", note: "신선상품 검품 커버리지 확대" },
-  { icon: Clock3, label: "업무 시간", before: "반복 수작업", after: "일 4시간 절감", note: "보고서 자동화 및 데이터 통합" },
-  { icon: BarChart3, label: "즉석조리 일매출", before: "0.5억", after: "0.7억", note: "안성점 매장 동선 개선" },
-  { icon: Trophy, label: "피자 구독권", before: "21위", after: "1위", note: "화서점 프로모션 기획 및 운영" },
+  { icon: PackageCheck, label: "GS 검품률", before: "3~5%", after: "6~8%", note: "신선상품 검품 수행률 개선", values: [4, 7], unit: "%" },
+  { icon: BarChart3, label: "GS SKU 커버리지", before: "326 SKU", after: "검품대상 관리", note: "총 SKU 680개 중 핵심 검품대상 326개 추적", values: [326, 680], unit: "SKU" },
+  { icon: Clock3, label: "업무 시간", before: "반복 보고", after: "일 4시간 절감", note: "보고서 자동화 및 데이터 통합", values: [8, 4], unit: "h" },
+  { icon: BarChart3, label: "이마트 즉석조리 일매출", before: "0.5억", after: "0.7억", note: "안성점 매장 동선 개선", values: [0.5, 0.7], unit: "억" },
+  { icon: Trophy, label: "이마트 피자 구독권", before: "21위", after: "1위", note: "화서점 프로모션 기획 및 운영", values: [21, 1], unit: "rank", reverse: true },
 ];
 
 const skillGroups = [
@@ -254,17 +261,16 @@ function Hero() {
           </div>
         </div>
         <div className="device-stage" aria-label="Inspection App 프로젝트 화면 미리보기">
-          <div className="laptop-frame">
+          <div className="desktop-product-frame">
             <div className="frame-dots"><span /><span /><span /></div>
             <img src={screenshots.dashboard} alt="Inspection Dashboard 화면" />
           </div>
-          <div className="phone-frame">
-            <div className="phone-notch" />
+          <div className="mobile-product-frame">
             <img src={screenshots.inspection} alt="Inspection App 모바일 화면" />
           </div>
           <div className="floating-note">
             <Sparkles size={18} />
-            <span>더 나은 운영 현장을 위해, 오늘도 개선합니다.</span>
+            <span>Dashboard · App · Report를 하나의 운영 흐름으로 연결</span>
           </div>
         </div>
       </div>
@@ -349,9 +355,15 @@ function ProjectCard({ project }) {
           {project.tech.map((tech) => <span key={tech}>{tech}</span>)}
         </div>
         <div className="card-actions">
-          <button onClick={() => toast.info("데모 URL이 연결되면 이 버튼에서 바로 열 수 있습니다.")}>
-            Live Demo <ExternalLink size={15} />
-          </button>
+          {project.liveUrl ? (
+            <a href={project.liveUrl} target="_blank" rel="noreferrer">
+              Live Demo <ExternalLink size={15} />
+            </a>
+          ) : (
+            <button onClick={() => toast.info("데모 URL이 연결되면 이 버튼에서 바로 열 수 있습니다.")}>
+              Live Demo <ExternalLink size={15} />
+            </button>
+          )}
           <Link to={`/projects/${project.id}`}>
             Case Study
           </Link>
@@ -364,23 +376,39 @@ function ProjectCard({ project }) {
 function ImpactSection() {
   return (
     <section className="section impact-section">
-      <SectionHeading eyebrow="Results / Impact" title="주요 성과" desc="Before → After가 바로 읽히도록 숫자로 정리했습니다." />
+      <SectionHeading eyebrow="Results / Impact" title="주요 성과" desc="GS리테일 검품 운영 지표와 이마트 매장 운영 성과를 숫자와 그래프로 정리했습니다." />
       <div className="impact-grid">
         {impactCards.map((card) => {
           const Icon = card.icon;
           return (
             <Reveal className="impact-card" key={card.label}>
-              <Icon size={28} />
-              <div>
+              <div className="impact-title">
+                <Icon size={26} />
                 <p>{card.label}</p>
-                <strong><span>{card.before}</span> → <b>{card.after}</b></strong>
-                <small>{card.note}</small>
               </div>
+              <strong><span>{card.before}</span> → <b>{card.after}</b></strong>
+              <MetricBars values={card.values} reverse={card.reverse} />
+              <small>{card.note}</small>
             </Reveal>
           );
         })}
       </div>
     </section>
+  );
+}
+
+function MetricBars({ values, reverse = false }) {
+  const max = Math.max(...values);
+  const normalized = values.map((value) => {
+    if (reverse) return value === Math.min(...values) ? 100 : Math.max(16, 100 - (value / max) * 70);
+    return Math.max(16, (value / max) * 100);
+  });
+  return (
+    <div className="metric-bars" aria-hidden="true">
+      {normalized.map((width, index) => (
+        <span key={`${width}-${index}`} style={{ "--bar-width": `${width}%` }} />
+      ))}
+    </div>
   );
 }
 
@@ -390,14 +418,22 @@ function ExperienceSection() {
       company: "GS리테일",
       period: "2024.02 - 현재",
       logo: "GS",
-      image: screenshots.summary,
+      metrics: [
+        { label: "검품률", from: "3~5%", to: "6~8%" },
+        { label: "SKU", from: "총 680", to: "대상 326" },
+        { label: "절감", from: "수기 보고", to: "일 4h" },
+      ],
       bullets: ["신선강화지원팀", "검품 시스템 구축 및 기준안 수립", "검품률 3~5% → 6~8%, 일 4시간 절감", "대시보드/보고서 생성기 운영", "H-100F 비파괴 당도계 연동"],
     },
     {
       company: "이마트 트레이더스",
       period: "2016 - 2023",
       logo: "emart",
-      image: screenshots.dashboard,
+      metrics: [
+        { label: "즉석조리", from: "0.5억", to: "0.7억" },
+        { label: "피자 구독권", from: "21위", to: "1위" },
+        { label: "신규 오픈", from: "3개점", to: "운영 안정화" },
+      ],
       bullets: ["8년+ 리테일 현장 경험", "3개점 신규 오픈 참여", "화서점 피자 구독권 21위 → 1위", "안성점 즉석조리 일매출 0.5억 → 0.7억", "매출, 재고, 동선, 프로모션 개선"],
     },
   ];
@@ -417,7 +453,15 @@ function ExperienceSection() {
                 </ul>
               </div>
             </div>
-            <img src={career.image} alt={`${career.company} 관련 프로젝트 화면`} />
+            <div className="career-metrics" aria-label={`${career.company} 주요 수치`}>
+              {career.metrics.map((metric) => (
+                <div key={metric.label}>
+                  <span>{metric.label}</span>
+                  <strong>{metric.from}</strong>
+                  <small>{metric.to}</small>
+                </div>
+              ))}
+            </div>
           </Reveal>
         ))}
       </div>
@@ -517,10 +561,8 @@ function ProjectDetail() {
   const project = projects.find((item) => item.id === id) ?? projects[0];
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const gallery = useMemo(() => [
-    { src: project.image },
-    { src: screenshots.summary },
-    { src: screenshots.dashboard },
-  ], [project.image]);
+    ...(project.gallery ?? [project.image]).map((src) => ({ src })),
+  ], [project.gallery, project.image]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
