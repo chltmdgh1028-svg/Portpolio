@@ -4,7 +4,6 @@ import { HashRouter, Link, Route, Routes, useLocation, useNavigate } from "react
 import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
-  BriefcaseBusiness,
   Check,
   ChevronRight,
   Download,
@@ -14,6 +13,7 @@ import {
   Lock,
   Mail,
   Menu,
+  Phone,
   Trophy,
   X,
 } from "lucide-react";
@@ -23,6 +23,7 @@ import "./styles.css";
 import {
   aboutSteps,
   careers,
+  certifications,
   contacts,
   emartData,
   gsData,
@@ -31,13 +32,13 @@ import {
   screens,
   sectionToNav,
   skillGroups,
+  strengths,
 } from "./data";
 import { EASE, Reveal } from "./ui";
 
 // Heavy, below-the-fold or route-level code is split out of the first bundle.
 const loadCharts = () => import("./charts");
 const InspectionRateChart = lazy(() => loadCharts().then((m) => ({ default: m.InspectionRateChart })));
-const RingStat = lazy(() => loadCharts().then((m) => ({ default: m.RingStat })));
 const SalesChart = lazy(() => loadCharts().then((m) => ({ default: m.SalesChart })));
 const loadDetail = () => import("./ProjectDetail");
 const ProjectDetail = lazy(loadDetail);
@@ -248,10 +249,10 @@ function BrowserFrame({ className, label, src, alt, delay = 0 }) {
 
 function HeroMockup() {
   return (
-    <div className="hero-mockup" role="group" aria-label="Inspection App, Inspection Dashboard, Report Generator 실제 화면">
-      <BrowserFrame className="frame-dashboard" label="Inspection Dashboard" src={screens.dashboardLogin} alt="Inspection Dashboard 로그인 화면" delay={0.1} />
-      <BrowserFrame className="frame-report" label="Report Generator" src={screens.reportGenerator} alt="Report Generator 화면" delay={0.25} />
-      <BrowserFrame className="frame-app" label="Inspection App" src={screens.inspectionApp} alt="Inspection App 화면" delay={0.4} />
+    <div className="hero-mockup" role="group" aria-label="Inspection App, Inspection Dashboard, Report Generator 화면 (샘플 데이터)">
+      <BrowserFrame className="frame-dashboard" label="Inspection Dashboard" src={screens.dashboard} alt="Inspection Dashboard 샘플 데이터 화면" delay={0.1} />
+      <BrowserFrame className="frame-report" label="Report Generator" src={screens.reportGenerator} alt="Report Generator 샘플 데이터 화면" delay={0.25} />
+      <BrowserFrame className="frame-app" label="Inspection App" src={screens.inspectionApp} alt="Inspection App 샘플 데이터 화면" delay={0.4} />
     </div>
   );
 }
@@ -316,9 +317,6 @@ function ProjectCard({ project, index }) {
   return (
     <Reveal className="project-card" delay={(index % 2) * 0.08}>
       <Link className="project-shot" to={`/projects/${project.id}`} aria-label={`${project.title} 상세 보기`}>
-        <span className="status-badge" style={{ "--badge": project.accent }}>
-          <i /> {project.status}
-        </span>
         <div className="shot-frame">
           <div className="frame-bar light"><i /><i /><i /><span>{project.english}</span></div>
           <img src={project.image} alt={project.imageAlt} loading="lazy" decoding="async" />
@@ -326,6 +324,9 @@ function ProjectCard({ project, index }) {
         {project.imageNote && <span className="image-note">{project.imageNote}</span>}
       </Link>
       <div className="project-body">
+        <span className="status-badge" style={{ "--badge": project.accent }}>
+          <i /> {project.statusLabel}
+        </span>
         <div className="project-head">
           <div>
             <h3>{project.title}</h3>
@@ -340,14 +341,15 @@ function ProjectCard({ project, index }) {
         </dl>
         <ul className="tech-stack">{project.tech.map((t) => <li key={t}>{t}</li>)}</ul>
         <div className="card-actions">
-          {project.liveUrl ? (
-            <a className="btn dark" href={project.liveUrl} target="_blank" rel="noreferrer">Live Demo <ExternalLink size={15} /></a>
-          ) : (
-            <button className="btn dark muted" onClick={() => toast.info(project.demoNote)} aria-label={`${project.title} Live Demo 안내`}>
-              Live Demo <Lock size={14} />
-            </button>
+          {project.demoUrl && (
+            <a className="btn dark" href={project.demoUrl} target="_blank" rel="noreferrer">
+              VIEW DEMO <ExternalLink size={15} />
+            </a>
           )}
           <Link className="btn outline" to={`/projects/${project.id}`} onPointerEnter={loadDetail}>Case Study <ArrowRight size={15} /></Link>
+          {!project.demoUrl && project.demoNote && (
+            <span className="demo-note"><Lock size={13} aria-hidden="true" /> {project.demoNote}</span>
+          )}
         </div>
       </div>
     </Reveal>
@@ -357,9 +359,6 @@ function ProjectCard({ project, index }) {
 /* ---------- charts ---------- */
 
 function GSDataStorySection() {
-  const skuPct = Number(((gsData.sku.target / gsData.sku.total) * 100).toFixed(1));
-  const qtyPct = Number(((gsData.quantity.target / gsData.quantity.total) * 100).toFixed(1));
-
   return (
     <section className="section data-story gs-story" id="gs-story">
       <div className="wrap">
@@ -405,18 +404,21 @@ function GSDataStorySection() {
 
           <Reveal className="story-card span-4" delay={0.16}>
             <div className="story-head">
-              <span>검품 대상 범위</span>
-              <strong><CountUp to={gsData.sku.target} /> / {gsData.sku.total}<small> SKU</small></strong>
+              <span>직접 구축한 범위</span>
+              <strong>제품 3 <small>+</small> 장비 연동 1</strong>
             </div>
-            <div className="ring-list">
-              <Deferred height={112}>
-                <RingStat value={skuPct} label="검품대상 SKU" caption={`총 SKU ${gsData.sku.total}개 중 ${gsData.sku.target}개`} />
-              </Deferred>
-              <Deferred height={112}>
-                <RingStat value={qtyPct} label="검품대상 수량" caption={`총 ${gsData.quantity.total.toLocaleString()}개 중 ${gsData.quantity.target.toLocaleString()}개`} />
-              </Deferred>
-            </div>
-            <p className="story-note">검품앱 7/29 화면 기준입니다. 검품 대상 비중이며, 검품 진행률(커버리지)과는 다른 값입니다.</p>
+            <ol className="scope-list">
+              {gsData.scope.map((item, i) => (
+                <li key={item.name}>
+                  <span className="scope-no">{i + 1}</span>
+                  <div>
+                    <strong>{item.name}</strong>
+                    <small>{item.desc}</small>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="story-note">제품 화면의 운영 수치는 공개하지 않고, 성과는 위 지표로만 보여드립니다.</p>
           </Reveal>
         </div>
       </div>
@@ -470,7 +472,7 @@ function EmartStorySection() {
   return (
     <section className="section data-story emart-story" id="emart-story">
       <div className="wrap">
-        <SectionHeading eyebrow="Emart Traders · Results" title="8년+ 현장에서 만든 성과" desc="매출 활성화, 프로모션 순위 상승, 신규점 오픈 경험을 GS리테일 성과와 분리해 보여드립니다." />
+        <SectionHeading eyebrow="Emart Traders · Results" title="7년 4개월 현장에서 만든 성과" desc="매출 활성화, 프로모션 순위 상승, 신규점 오픈 경험을 GS리테일 성과와 분리해 보여드립니다." />
         <div className="story-grid emart-grid">
           <Reveal className="story-card span-5">
             <div className="story-head">
@@ -518,7 +520,7 @@ function ExperienceSection() {
                 <span className="career-mark">{career.mark}</span>
                 <div>
                   <h3>{career.company}</h3>
-                  <p>{career.team} · {career.period}</p>
+                  <p>{career.meta.join(" · ")}</p>
                 </div>
               </div>
               <p className="career-summary">{career.summary}</p>
@@ -585,16 +587,43 @@ function SkillsSection() {
   return (
     <section className="section skills-section" id="skills">
       <div className="wrap">
-        <SectionHeading eyebrow="Skills" title="운영과 개발, 두 가지를 함께" desc="기술 스택보다 현장 문제를 제품으로 옮기는 능력과 구현 역량의 균형을 보여드립니다." />
+        <SectionHeading eyebrow="Skills & Strengths" title="운영, 데이터, AI, 개발을 함께" desc="현장에서 문제를 찾는 능력과 직접 해결하는 기술 역량을 함께 갖추고 있습니다." />
         <div className="skills-grid">
           {skillGroups.map((group, i) => (
             <Reveal className={`skill-card ${group.key}`} key={group.key} delay={i * 0.06}>
               <span className="skill-index">0{i + 1}</span>
               <h3>{group.title}</h3>
               <p>{group.desc}</p>
-              <ul>{group.items.map((item) => <li key={item}>{item}</li>)}</ul>
+              <ul>
+                {group.items.map((item) => (
+                  <li key={item.name}>
+                    {item.name}
+                    {item.level && <em>{item.level}</em>}
+                  </li>
+                ))}
+              </ul>
             </Reveal>
           ))}
+        </div>
+
+        <h3 className="sub-heading">Strengths</h3>
+        <div className="strengths-grid">
+          {strengths.map((item, i) => (
+            <Reveal className="strength-card" key={item.title} delay={(i % 3) * 0.06}>
+              <span className="strength-no">0{i + 1}</span>
+              <h4>{item.title}</h4>
+              <p>{item.body}</p>
+            </Reveal>
+          ))}
+        </div>
+
+        <div className="cert-row">
+          <h3 className="sub-heading">Certifications</h3>
+          <ul>
+            {certifications.map((cert) => (
+              <li key={cert}><Check size={16} aria-hidden="true" /> {cert}</li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
@@ -603,12 +632,11 @@ function SkillsSection() {
 
 function ContactSection() {
   const items = [
-    contacts.email && { icon: Mail, label: "Email", value: contacts.email, href: `mailto:${contacts.email}` },
-    { icon: Github, label: "GitHub", value: contacts.github.replace("https://", ""), href: contacts.github },
-    { icon: ExternalLink, label: "Live Service", value: "Inspection Dashboard", href: contacts.dashboard },
-    contacts.linkedin && { icon: BriefcaseBusiness, label: "LinkedIn", value: contacts.linkedin.replace("https://", ""), href: contacts.linkedin },
+    { icon: Mail, label: "Email", value: contacts.email, href: `mailto:${contacts.email}` },
+    { icon: Phone, label: "Phone", value: contacts.phone, href: contacts.phoneHref },
+    { icon: Github, label: "GitHub", value: contacts.github.replace("https://", ""), href: contacts.github, external: true },
     { icon: FileText, label: "Resume / 소개서", value: "소개서 다운로드", href: contacts.resume, download: true },
-  ].filter(Boolean);
+  ];
 
   return (
     <section className="contact-section" id="contact">
@@ -617,10 +645,11 @@ function ContactSection() {
           <p className="section-eyebrow">Contact</p>
           <h2>현장의 문제를 제품으로 바꾸는 일을 함께하고 싶습니다.</h2>
           <p>새로운 도전과 협업의 기회를 열어두고 있습니다.</p>
+          <p className="contact-name"><strong>{contacts.name}</strong> / {contacts.nameEn}</p>
         </div>
         <div className="contact-grid">
-          {items.map(({ icon: Icon, label, value, href, download }) => (
-            <a key={label} href={href} {...(download ? { download: true } : { target: "_blank", rel: "noreferrer" })}>
+          {items.map(({ icon: Icon, label, value, href, download, external }) => (
+            <a key={label} href={href} {...(download ? { download: true } : external ? { target: "_blank", rel: "noreferrer" } : {})}>
               <Icon size={22} aria-hidden="true" />
               <span>{label}</span>
               <strong>{value}</strong>

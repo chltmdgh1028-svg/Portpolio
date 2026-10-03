@@ -4,3 +4,4 @@ node_modules/
 *.log
 *.tar.gz
 .DS_Store
+.claude/

@@ -34,19 +34,22 @@ export default function ProjectDetail() {
         </button>
         <section className="detail-hero">
           <div>
-            <span className="status-badge static" style={{ "--badge": project.accent }}><i /> {project.status}</span>
+            <span className="status-badge static" style={{ "--badge": project.accent }}><i /> {project.statusLabel}</span>
             <h1>{project.title}</h1>
             <p className="detail-english">{project.english}</p>
             <strong className="detail-result">{project.result}</strong>
             <p className="detail-one">{project.oneLine}</p>
-            {project.liveUrl && (
-              <a className="btn primary" href={project.liveUrl} target="_blank" rel="noreferrer">Live Demo <ExternalLink size={15} /></a>
+            {project.demoUrl && (
+              <a className="btn primary" href={project.demoUrl} target="_blank" rel="noreferrer">VIEW DEMO <ExternalLink size={15} /></a>
             )}
-            {!project.liveUrl && project.demoNote && <p className="detail-note"><Lock size={14} /> {project.demoNote}</p>}
+            {!project.demoUrl && project.demoNote && <p className="detail-note"><Lock size={14} /> {project.demoNote}</p>}
           </div>
-          <button className="detail-shot" onClick={() => setLightboxIndex(0)} aria-label="스크린샷 확대">
-            <img src={project.image} alt={project.imageAlt} />
-          </button>
+          <div className="detail-shot-wrap">
+            <button className="detail-shot" onClick={() => setLightboxIndex(0)} aria-label="스크린샷 확대">
+              <img src={project.image} alt={project.imageAlt} />
+            </button>
+            {project.imageNote && <span className="image-note static">{project.imageNote}</span>}
+          </div>
         </section>
 
         <section className="case-grid">

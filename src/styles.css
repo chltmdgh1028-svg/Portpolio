@@ -133,12 +133,6 @@ button:focus-visible {
   box-shadow: 0 12px 26px rgba(7, 17, 31, 0.25);
 }
 
-.btn.dark.muted {
-  border-color: #d5dfec;
-  background: #eef3fa;
-  color: #44546b;
-}
-
 .btn.outline {
   border-color: #d3deec;
   background: #fff;
@@ -489,7 +483,7 @@ button:focus-visible {
   right: 0;
   bottom: 0;
   z-index: 3;
-  width: 72%;
+  width: 66%;
 }
 
 .frame-bar {
@@ -697,20 +691,19 @@ button:focus-visible {
 }
 
 .status-badge {
-  position: absolute;
-  top: 34px;
-  right: 40px;
-  z-index: 2;
   display: inline-flex;
-  height: 20px;
+  width: max-content;
+  max-width: 100%;
+  height: 26px;
   align-items: center;
-  gap: 6px;
-  padding: 0 9px 0 8px;
+  gap: 7px;
+  padding: 0 12px 0 10px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--badge) 12%, #fff);
-  color: var(--badge);
+  color: color-mix(in srgb, var(--badge) 85%, #000);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.05em;
 }
 
 .status-badge i {
@@ -721,7 +714,6 @@ button:focus-visible {
 }
 
 .status-badge.static {
-  position: static;
   margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
@@ -739,6 +731,25 @@ button:focus-visible {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.demo-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.detail-shot-wrap {
+  position: relative;
+}
+
+.image-note.static {
+  bottom: 14px;
+  left: 14px;
 }
 
 .project-body {
@@ -1076,49 +1087,51 @@ button:focus-visible {
   content: "↓ ";
 }
 
-/* rings */
+/* scope (what was built) */
 
-.ring-list {
+.scope-list {
   display: grid;
   flex: 1;
   align-content: center;
-  gap: 22px;
+  gap: 10px;
 }
 
-.ring-stat {
+.scope-list li {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   align-items: center;
-  gap: 20px;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #e6edf7;
+  border-radius: 14px;
+  background: #f7faff;
 }
 
-.ring {
-  position: relative;
-  width: 112px;
-  height: 112px;
-}
-
-.ring strong {
-  position: absolute;
-  inset: 0;
+.scope-no {
   display: grid;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  color: var(--blue-ink);
-  font-size: 21px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.scope-list strong {
+  display: block;
+  font-size: 15.5px;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
-.ring-stat > div:last-child span {
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.ring-stat p {
-  margin-top: 4px;
+.scope-list small {
+  display: block;
+  margin-top: 2px;
   color: var(--muted);
-  font-size: 13.5px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 /* ranking */
@@ -1553,15 +1566,15 @@ button:focus-visible {
   box-shadow: var(--card-shadow);
 }
 
-.skill-card.front {
+.skill-card.data {
   border-top-color: var(--blue);
 }
 
-.skill-card.back {
+.skill-card.ai {
   border-top-color: var(--blue-light);
 }
 
-.skill-card.tools {
+.skill-card.dev {
   border-top-color: #b4c4dc;
 }
 
@@ -1607,6 +1620,101 @@ button:focus-visible {
   color: #2a3850;
 }
 
+.skill-card li em {
+  margin-left: 7px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.sub-heading {
+  margin: 64px 0 20px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.strengths-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.strength-card {
+  padding: 26px 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(160deg, #fff 0%, #f6f9fe 100%);
+  box-shadow: var(--card-shadow);
+}
+
+.strength-no {
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.strength-card h4 {
+  margin-top: 12px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.strength-card p {
+  margin-top: 8px;
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.cert-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: 48px;
+  padding: 22px 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.cert-row .sub-heading {
+  margin: 0;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.cert-row ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cert-row li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #1d4ba8;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.cert-row li svg {
+  color: var(--blue);
+}
+
 /* ---------- contact / footer ---------- */
 
 .contact-section {
@@ -1634,6 +1742,17 @@ button:focus-visible {
   color: rgba(255, 255, 255, 0.66);
   font-size: 17px;
   line-height: 1.7;
+}
+
+.contact-section .contact-name {
+  margin-top: 26px;
+  font-size: 15px;
+}
+
+.contact-name strong {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .contact-grid {
@@ -1891,6 +2010,10 @@ button:focus-visible {
 }
 
 @media (max-width: 1100px) {
+  .strengths-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .section-heading {
     grid-template-columns: 1fr;
     margin-bottom: 36px;
@@ -2053,6 +2176,23 @@ button:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .strengths-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sub-heading {
+    margin-top: 48px;
+  }
+
+  .cert-row {
+    padding: 18px 18px;
+  }
+
+  .demo-note {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+
   .header-inner {
     height: 64px;
   }
@@ -2173,10 +2313,6 @@ button:focus-visible {
     padding: 18px 16px 0;
   }
 
-  .status-badge {
-    top: 22px;
-    right: 26px;
-  }
 
   .image-note {
     bottom: 10px;
@@ -2234,19 +2370,8 @@ button:focus-visible {
     font-size: 22px;
   }
 
-  .ring-stat {
-    grid-template-columns: 96px minmax(0, 1fr);
-    gap: 16px;
-  }
 
-  .ring {
-    width: 96px;
-    height: 96px;
-  }
 
-  .ring strong {
-    font-size: 18px;
-  }
 
   .rank-labels b {
     font-size: 28px;

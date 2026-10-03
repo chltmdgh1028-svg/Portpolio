@@ -4,9 +4,6 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
-  PolarAngleAxis,
-  RadialBar,
-  RadialBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -35,27 +32,6 @@ export function InspectionRateChart() {
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
-  );
-}
-
-export function RingStat({ value, label, caption }) {
-  const data = [{ name: label, value }];
-  return (
-    <div className="ring-stat">
-      <div className="ring" role="img" aria-label={`${label} ${value}%`}>
-        <ResponsiveContainer width="100%" height="100%">
-          <RadialBarChart data={data} innerRadius="74%" outerRadius="100%" startAngle={90} endAngle={-270} barSize={12}>
-            <PolarAngleAxis type="number" domain={[0, 100]} tick={false} angleAxisId={0} />
-            <RadialBar dataKey="value" cornerRadius={8} fill={BLUE} background={{ fill: "#e4ecf8" }} animationDuration={1000} />
-          </RadialBarChart>
-        </ResponsiveContainer>
-        <strong>{value}%</strong>
-      </div>
-      <div>
-        <span>{label}</span>
-        <p>{caption}</p>
-      </div>
     </div>
   );
 }
