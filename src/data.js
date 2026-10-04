@@ -27,13 +27,13 @@ export const screens = {
 
 // Screens shown in the horizontal showreel (all sanitized / mock data).
 export const showreel = [
-  { src: screens.inspectionApp, projectId: "inspection-app", caption: "검품 현황 · 협력사별 진행", size: "l" },
-  { src: screens.dashboard, projectId: "inspection-dashboard", caption: "품질 운영 Overview", size: "xl" },
-  { src: screens.reportGenerator, projectId: "report-generator", caption: "보고서 생성 단계", size: "m" },
-  { src: screens.oneOps, projectId: "one-ops", caption: "본사 통합 현황", size: "l" },
-  { src: screens.inspectionAppAnalysis, projectId: "inspection-app", caption: "불량 사유 분석", size: "m" },
-  { src: screens.dashboardHistory, projectId: "inspection-dashboard", caption: "검품 이력 · 캘린더", size: "xl" },
-  { src: screens.dashboardProducts, projectId: "inspection-dashboard", caption: "상품 분석", size: "l" },
+  { src: screens.inspectionApp, projectId: "inspection-app", caption: "검품 현황 · 협력사별 진행", size: "l", pos: "center top" },
+  { src: screens.dashboard, projectId: "inspection-dashboard", caption: "품질 운영 Overview", size: "xl", pos: "center" },
+  { src: screens.reportGenerator, projectId: "report-generator", caption: "보고서 생성 단계", size: "n", pos: "center top" },
+  { src: screens.oneOps, projectId: "one-ops", caption: "본사 통합 현황", size: "l", pos: "center" },
+  { src: screens.inspectionAppAnalysis, projectId: "inspection-app", caption: "불량 사유 분석", size: "n", pos: "center top" },
+  { src: screens.dashboardHistory, projectId: "inspection-dashboard", caption: "검품 이력 · 캘린더", size: "xl", pos: "center" },
+  { src: screens.dashboardProducts, projectId: "inspection-dashboard", caption: "상품 분석", size: "l", pos: "center" },
 ];
 
 // How the four products connect: capture -> monitor -> report -> expand.

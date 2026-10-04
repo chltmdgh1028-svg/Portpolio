@@ -277,32 +277,37 @@
 
 .reel {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   perspective: 1800px;
 }
 
+/* No native scrollbar anywhere: the rail is moved by a transform animation inside an overflow:hidden frame. */
 .reel-row {
   overflow: hidden;
-  padding: 14px 0 22px;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  padding: 16px 0 26px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 
+.reel-row::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* ~58s for one loop of the first row: 30-45px/s, i.e. a full screen takes roughly 30-40s */
 .reel-track {
   display: flex;
   width: max-content;
-  animation: reel-left 84s linear infinite;
+  animation: reel-left 58s linear infinite;
   will-change: transform;
 }
 
 .reel-row.reverse .reel-track {
   animation-direction: reverse;
-  animation-duration: 98s;
-}
-
-.reel-row:hover .reel-track,
-.reel-row:focus-within .reel-track {
-  animation-play-state: paused;
+  animation-duration: 66s;
 }
 
 @keyframes reel-left {
@@ -316,22 +321,24 @@
   position: relative;
   flex: none;
   width: calc(var(--w) * var(--k));
-  margin-right: 26px;
+  margin-right: 28px;
 }
 
-.reel-tile.size-m {
-  --w: 460px;
+/* one 16:10 frame system; only the width has a little rhythm */
+.reel-tile.size-n {
+  --w: 560px;
 }
 .reel-tile.size-l {
-  --w: 580px;
+  --w: 610px;
 }
 .reel-tile.size-xl {
-  --w: 700px;
+  --w: 720px;
 }
 
 .reel-link {
   position: relative;
   display: block;
+  aspect-ratio: 16 / 10;
   overflow: hidden;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.13);
@@ -342,29 +349,46 @@
 }
 
 .reel-link img {
+  display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 10;
+  height: 100%;
   object-fit: cover;
+}
+
+/* resting dimness: lifts on hover (opacity only) */
+.reel-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #050b16;
+  opacity: 0.18;
+  transition: opacity 0.6s var(--ease);
+  pointer-events: none;
 }
 
 .reel-link:hover,
 .reel-link:focus-visible {
-  transform: perspective(1400px) rotateY(0deg) scale(1.03);
+  transform: perspective(1400px) rotateY(calc(var(--hx, 0) * 2.2deg)) rotateX(calc(var(--hy, 0) * -1.8deg)) scale(1.015);
+  transition: transform 0.45s var(--ease), border-color 0.4s, box-shadow 0.6s var(--ease);
   border-color: rgba(106, 166, 255, 0.6);
   box-shadow: 0 40px 70px -26px rgba(0, 0, 0, 0.85), 0 0 70px -20px rgba(47, 123, 255, 0.55);
+}
+
+.reel-link:hover::after,
+.reel-link:focus-visible::after {
+  opacity: 0;
 }
 
 .reel-cap {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 4px;
   padding: 22px;
   isolation: isolate;
-  background: linear-gradient(to top, rgba(5, 11, 22, 0.86) 0%, rgba(5, 11, 22, 0.4) 22%, rgba(5, 11, 22, 0) 44%);
 }
 
 .reel-cap::before {
@@ -372,13 +396,25 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(to top, rgba(5, 11, 22, 0.94) 0%, rgba(5, 11, 22, 0.7) 40%, rgba(5, 11, 22, 0.1) 75%);
-  opacity: 0;
-  transition: opacity 0.5s var(--ease);
+  background: linear-gradient(to top, rgba(5, 11, 22, 0.9) 0%, rgba(5, 11, 22, 0.5) 28%, rgba(5, 11, 22, 0) 56%);
+  transition: opacity 0.6s var(--ease);
 }
 
 .reel-link:hover .reel-cap::before,
 .reel-link:focus-visible .reel-cap::before {
+  opacity: 0.82;
+}
+
+.reel-cap small,
+.reel-cap strong {
+  opacity: 0.78;
+  transition: opacity 0.5s var(--ease);
+}
+
+.reel-link:hover .reel-cap small,
+.reel-link:hover .reel-cap strong,
+.reel-link:focus-visible .reel-cap small,
+.reel-link:focus-visible .reel-cap strong {
   opacity: 1;
 }
 
@@ -406,7 +442,7 @@
 .reel-cap em {
   font-size: 13.5px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.8);
   overflow: hidden;
 }
 
@@ -470,7 +506,7 @@
 /* ===== responsive ===== */
 @media (min-width: 1700px) {
   .reel-tile {
-    --k: 1.18;
+    --k: 1.1;
   }
 }
 
@@ -564,7 +600,7 @@
   }
 
   .reel-tile,
-  .reel-tile.size-m,
+  .reel-tile.size-n,
   .reel-tile.size-l,
   .reel-tile.size-xl {
     --w: 78vw;
@@ -572,7 +608,8 @@
     margin-right: 14px;
   }
 
-  .reel-link {
+  .reel-link,
+  .reel-link:hover {
     transform: none;
   }
 
@@ -603,6 +640,6 @@
     animation: none !important;
   }
   .reel-row {
-    overflow-x: auto;
+    overflow-x: auto; /* still no visible scrollbar; users can swipe / trackpad-scroll the static rail */
   }
 }

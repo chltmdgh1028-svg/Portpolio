@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { projectPath, projects, showreel } from "./data";
 import { TLink } from "./transition";
+import { useReducedMotion } from "framer-motion";
 import { Shot, useMedia } from "./ui";
 
 const byId = Object.fromEntries(projects.map((p) => [p.id, p]));
@@ -39,8 +40,10 @@ export function HeroScene({ compact = false }) {
 }
 
 /* ---------- showreel ---------- */
+// A single product-showcase rail: every frame shares one 16:10 box (only the width has a little rhythm),
+// the track is moved with a CSS transform animation, and hovering eases the rail to a stop (and back).
 
-const TILT = [-5, 0, 4, -3, 3, -4, 2];
+const TILT = [-4, 0, 3, -3, 2, -2, 4];
 
 function ReelTile({ item, index, clone }) {
   const project = byId[item.projectId];
@@ -54,7 +57,12 @@ function ReelTile({ item, index, clone }) {
         tabIndex={clone ? -1 : undefined}
         aria-label={`${project.english} — ${item.caption}. 케이스 스터디 보기`}
       >
-        <Shot src={item.src} alt={clone ? "" : `${project.english} 화면 — ${item.caption} (sanitized demo data)`} sizes="(min-width: 1280px) 660px, 70vw" />
+        <Shot
+          src={item.src}
+          alt={clone ? "" : `${project.english} 화면 — ${item.caption} (sanitized demo data)`}
+          sizes="(min-width: 1700px) 850px, (min-width: 1280px) 720px, 78vw"
+          style={{ objectPosition: item.pos }}
+        />
         <span className="reel-cap">
           <small>{project.storyStep}</small>
           <strong>{project.english}</strong>
@@ -73,7 +81,7 @@ function ReelTile({ item, index, clone }) {
   );
 }
 
-/** Slow auto-drift for the touch rail. Pauses while the user touches/scrolls, resumes after a short idle. */
+/** Touch rail: slow auto-drift that yields to the user's swipe (scrollbar is hidden in CSS). */
 function useAutoDrift(ref, enabled) {
   useEffect(() => {
     const el = ref.current;
@@ -98,7 +106,7 @@ function useAutoDrift(ref, enabled) {
       const dt = Math.min(t - last, 64);
       last = t;
       if (!paused && visible) {
-        pos += dt * 0.016;
+        pos += dt * 0.014;
         const half = el.scrollWidth / 2;
         if (pos >= half) pos -= half;
         el.scrollLeft = pos;
@@ -120,13 +128,96 @@ function useAutoDrift(ref, enabled) {
   }, [ref, enabled]);
 }
 
-function ReelRow({ items, reverse, drift, label }) {
+/** Eases the CSS animation's playbackRate to 0 on hover/focus and back to 1 on leave (no jump, no per-frame React state). */
+function useRailEase(rowRef, trackRef, enabled) {
+  useEffect(() => {
+    const row = rowRef.current;
+    const track = trackRef.current;
+    if (!row || !track || !enabled) return undefined;
+    let rate = 1;
+    let target = 1;
+    let raf = 0;
+    const step = () => {
+      raf = 0;
+      const anim = track.getAnimations()[0];
+      if (!anim) return;
+      rate += (target - rate) * 0.1;
+      if (Math.abs(target - rate) < 0.01) rate = target;
+      if (anim.updatePlaybackRate) anim.updatePlaybackRate(rate);
+      else anim.playbackRate = rate;
+      if (rate !== target) raf = requestAnimationFrame(step);
+    };
+    const set = (t) => {
+      target = t;
+      if (!raf) raf = requestAnimationFrame(step);
+    };
+
+    // cursor depth on the hovered frame (rAF throttled, transform only)
+    let hovered = null;
+    let frame = 0;
+    let hx = 0;
+    let hy = 0;
+    const reset = () => {
+      if (!hovered) return;
+      hovered.style.setProperty("--hx", "0");
+      hovered.style.setProperty("--hy", "0");
+    };
+    const apply = () => {
+      frame = 0;
+      if (!hovered) return;
+      hovered.style.setProperty("--hx", hx.toFixed(3));
+      hovered.style.setProperty("--hy", hy.toFixed(3));
+    };
+    const onMove = (e) => {
+      if (e.pointerType !== "mouse") return;
+      const link = e.target.closest ? e.target.closest(".reel-link") : null;
+      if (link !== hovered) {
+        reset();
+        hovered = link;
+      }
+      if (!hovered) return;
+      const r = hovered.getBoundingClientRect();
+      hx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      hy = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+    const enter = (e) => {
+      if (e.pointerType === "mouse") set(0);
+    };
+    const leave = (e) => {
+      if (e.pointerType !== "mouse") return;
+      set(1);
+      reset();
+      hovered = null;
+    };
+    const focusIn = () => set(0);
+    const focusOut = () => set(1);
+    row.addEventListener("pointerenter", enter);
+    row.addEventListener("pointerleave", leave);
+    row.addEventListener("pointermove", onMove, { passive: true });
+    row.addEventListener("focusin", focusIn);
+    row.addEventListener("focusout", focusOut);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      if (frame) cancelAnimationFrame(frame);
+      row.removeEventListener("pointerenter", enter);
+      row.removeEventListener("pointerleave", leave);
+      row.removeEventListener("pointermove", onMove);
+      row.removeEventListener("focusin", focusIn);
+      row.removeEventListener("focusout", focusOut);
+    };
+  }, [rowRef, trackRef, enabled]);
+}
+
+function ReelRow({ items, reverse, drift, ease, label }) {
   const ref = useRef(null);
+  const trackRef = useRef(null);
   useAutoDrift(ref, drift);
+  useRailEase(ref, trackRef, ease);
   const list = [...items, ...items]; // two copies -> seamless -50% loop
   return (
     <div className={`reel-row${reverse ? " reverse" : ""}`} ref={ref} role="region" aria-label={label}>
-      <ul className="reel-track">
+      <ul className="reel-track" ref={trackRef}>
         {list.map((item, i) => (
           <ReelTile key={`${item.src}-${i}`} item={item} index={i % items.length} clone={i >= items.length} />
         ))}
@@ -137,6 +228,7 @@ function ReelRow({ items, reverse, drift, label }) {
 
 export function Showreel() {
   const mobile = useMedia("(max-width: 720px)");
+  const reduce = useReducedMotion();
   const rowA = [showreel[0], showreel[1], showreel[2], showreel[3]];
   const rowB = [showreel[4], showreel[5], showreel[6], showreel[0]];
   const [mounted, setMounted] = useState(false);
@@ -152,11 +244,11 @@ export function Showreel() {
       </div>
       <div className="reel">
         {mobile ? (
-          <ReelRow items={[...rowA, ...rowB.slice(0, 3)]} drift={mounted} label="제품 화면 모음 (스와이프)" />
+          <ReelRow items={[...rowA, ...rowB.slice(0, 3)]} drift={mounted && !reduce} label="제품 화면 모음 (스와이프)" />
         ) : (
           <>
-            <ReelRow items={rowA} label="제품 화면 1열" />
-            <ReelRow items={rowB} reverse label="제품 화면 2열" />
+            <ReelRow items={rowA} ease={!reduce} label="제품 화면 1열" />
+            <ReelRow items={rowB} reverse ease={!reduce} label="제품 화면 2열" />
           </>
         )}
       </div>
