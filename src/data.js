@@ -423,11 +423,11 @@ export const strengths = [
 
 export const certifications = ["컴퓨터활용능력 2급", "자동차운전면허 1종 보통"];
 
-// Final PDFs are not ready yet. Put the file path here (e.g. "/Seungho_Choi_Resume.pdf" after adding the file to
-// /public) and the header / contact buttons switch from "준비 중" to a working download automatically.
+// Downloadable PDFs live in /public; `file` is the served path and `filename` the name the visitor's browser saves.
+// Set `file` back to null to show the "PDF 준비 중" (disabled) state again.
 export const documents = {
-  resume: { label: "RESUME", file: null, filename: "Seungho_Choi_Resume.pdf" },
-  portfolio: { label: "PORTFOLIO PDF", file: null, filename: "Seungho_Choi_Portfolio.pdf" },
+  resume: { label: "RESUME", file: "/Seungho_Choi_Resume.pdf", filename: "최승호_CV.pdf" },
+  portfolio: { label: "PORTFOLIO PDF", file: "/Seungho_Choi_Portfolio.pdf", filename: "최승호_포트폴리오.pdf" },
 };
 
 export const contacts = {
