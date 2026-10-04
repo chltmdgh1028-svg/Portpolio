@@ -5,15 +5,15 @@
 export const SITE_URL = "https://seungho-choi-portfolio.vercel.app";
 
 export const navItems = [
-  { id: "work", label: "WORK" },
-  { id: "experience", label: "EXPERIENCE" },
-  { id: "about", label: "ABOUT" },
-  { id: "skills", label: "SKILLS" },
-  { id: "contact", label: "CONTACT" },
+  { to: "/main", label: "MAIN", end: true },
+  { to: "/main/work", label: "WORK" },
+  { to: "/main/impact", label: "IMPACT" },
+  { to: "/main/experience", label: "EXPERIENCE" },
+  { to: "/main/profile", label: "PROFILE" },
+  { to: "/main#contact", label: "CONTACT", contact: true },
 ];
 
-// section ids that belong to a nav item without having their own menu entry
-export const sectionToNav = { showreel: "work", "gs-story": "work", "emart-story": "work" };
+export const projectPath = (id) => `/main/work/${id}`;
 
 export const screens = {
   inspectionApp: "/screens/inspection-app.webp",
@@ -57,6 +57,14 @@ export const gsData = {
     { step: "04", title: "Result", body: "검품률은 3~5%에서 6~8%로, 반복 업무는 하루 4시간 줄었습니다.", visual: "result" },
   ],
 };
+
+// Gate / hub copy
+export const keyImpact = [
+  { value: "3~5% → 6~8%", label: "검품률" },
+  { value: "−4h / day", label: "업무시간 절감" },
+  { value: "8+ YEARS", label: "Retail Operations" },
+  { value: "4 PRODUCTS", label: "Built & Operated" },
+];
 
 export const emartData = {
   sales: [
@@ -321,7 +329,7 @@ export const careers = [
   {
     key: "emart",
     company: "이마트 트레이더스",
-    logo: { src: "/logos/emart-traders.png", w: 205, h: 191, alt: "E-MART TRADERS 로고" },
+    logo: { src: "/logos/emart-traders.png", w: 447, h: 171, alt: "TRADERS WHOLESALE CLUB 로고" },
     meta: ["주임 (BAND5)", "총 7년 4개월 근무"],
     summary: "7년 4개월간 매장 운영으로 매출·재고·동선·프로모션을 현장에서 개선한 경험",
     impacts: [
@@ -340,11 +348,11 @@ export const careers = [
 ];
 
 export const aboutSteps = [
-  { title: "관찰", body: "현장에서 반복되는 불편을 먼저 발견합니다." },
-  { title: "의심", body: "당연하게 해오던 절차를 다시 묻습니다." },
-  { title: "데이터 확인", body: "문제의 크기를 숫자로 확인합니다." },
-  { title: "직접 구현", body: "필요한 도구를 직접 만듭니다." },
-  { title: "현장 검증", body: "운영에 적용하고 결과로 증명합니다." },
+  { word: "OBSERVE", title: "관찰", body: "현장에서 반복되는 불편을 발견합니다." },
+  { word: "QUESTION", title: "의심", body: "당연하게 해오던 절차를 다시 질문합니다." },
+  { word: "MEASURE", title: "데이터 확인", body: "문제의 크기를 데이터로 확인합니다." },
+  { word: "BUILD", title: "직접 구현", body: "필요한 도구를 직접 만듭니다." },
+  { word: "VALIDATE", title: "현장 검증", body: "운영에 적용하고 결과로 검증합니다." },
 ];
 
 // `level` is a plain text label, never a percentage or star rating.

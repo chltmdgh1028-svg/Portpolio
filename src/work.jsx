@@ -1,12 +1,9 @@
 import React, { useRef } from "react";
-import { Link } from "react-router-dom";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Lock } from "lucide-react";
-import { projectStory, projects } from "./data";
-import { ClipReveal, Reveal, SectionHeading, Shot, useHoverCapable, usePointerVars } from "./ui";
-
-// Warm the case-study chunk when a visitor shows interest.
-const loadDetail = () => import("./ProjectDetail");
+import { projectPath, projectStory, projects } from "./data";
+import { TLink } from "./transition";
+import { ClipReveal, Reveal, Shot, useHoverCapable, usePointerVars } from "./ui";
 
 function WorkItem({ project, index }) {
   const ref = useRef(null);
@@ -48,9 +45,9 @@ function WorkItem({ project, index }) {
           </p>
         </Reveal>
         <Reveal delay={0.15} className="work-cta">
-          <Link className="cta-link" to={`/projects/${project.id}`} onPointerEnter={loadDetail} onFocus={loadDetail}>
+          <TLink className="cta-link" to={projectPath(project.id)} kind="expand" tone="work">
             EXPLORE CASE STUDY <ArrowRight size={16} />
-          </Link>
+          </TLink>
           {project.demoUrl && (
             <a className="cta-demo" href={project.demoUrl} target="_blank" rel="noreferrer">
               VIEW DEMO <ArrowUpRight size={15} />
@@ -67,7 +64,7 @@ function WorkItem({ project, index }) {
       <div className="work-visual">
         <ClipReveal>
           <motion.div style={{ y }} className="work-parallax">
-            <Link ref={frameRef} className="work-frame" to={`/projects/${project.id}`} aria-label={`${project.english} 케이스 스터디 보기`} onPointerEnter={loadDetail}>
+            <TLink ref={frameRef} className="work-frame" to={projectPath(project.id)} kind="expand" tone="work" aria-label={`${project.english} 케이스 스터디 보기`}>
               <span className="win-bar light">
                 <i />
                 <i />
@@ -76,7 +73,7 @@ function WorkItem({ project, index }) {
               </span>
               <Shot src={project.image} alt={project.imageAlt} sizes="(min-width: 1280px) 720px, 92vw" />
               <span className="spot" aria-hidden="true" />
-            </Link>
+            </TLink>
           </motion.div>
         </ClipReveal>
         {project.imageNote && <span className="image-note">{project.imageNote}</span>}
@@ -95,21 +92,12 @@ function WorkItem({ project, index }) {
   );
 }
 
-export function SelectedWork() {
+export function WorkList() {
   return (
-    <section className="work light" id="work">
-      <div className="wrap">
-        <SectionHeading
-          eyebrow="Selected Work"
-          title="현장 문제에서 운영 시스템으로"
-          desc="현장에서 데이터를 만들고, 모니터링하고, 보고하고, 더 넓은 운영으로 확장해온 네 가지 제품입니다."
-        />
-        <div className="work-list">
-          {projects.map((project, index) => (
-            <WorkItem key={project.id} project={project} index={index} />
-          ))}
-        </div>
-      </div>
-    </section>
+    <div className="work-list">
+      {projects.map((project, index) => (
+        <WorkItem key={project.id} project={project} index={index} />
+      ))}
+    </div>
   );
 }

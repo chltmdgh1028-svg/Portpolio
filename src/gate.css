@@ -1,0 +1,517 @@
+/* ===== GATE / entrance ===== */
+.gate {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #03070d;
+  color: #fff;
+  touch-action: manipulation;
+}
+
+.gate-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gate .aurora.a1 {
+  width: 70vw;
+  height: 70vw;
+  left: -16vw;
+  top: -30vw;
+  background: radial-gradient(closest-side, rgba(47, 123, 255, 0.46), rgba(47, 123, 255, 0) 72%);
+  translate: calc(var(--mx, 0) * 34px) calc(var(--my, 0) * 22px);
+  transition: translate 0.9s var(--ease);
+}
+
+.gate .aurora.a2 {
+  width: 56vw;
+  height: 56vw;
+  right: -14vw;
+  top: -6vw;
+  background: radial-gradient(closest-side, rgba(99, 102, 241, 0.26), rgba(99, 102, 241, 0) 72%);
+}
+
+.gate .aurora.a3 {
+  width: 60vw;
+  height: 60vw;
+  left: 18vw;
+  bottom: -38vw;
+  background: radial-gradient(closest-side, rgba(47, 123, 255, 0.2), rgba(47, 123, 255, 0) 72%);
+}
+
+.gate .grid-bg {
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 15%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 15%, transparent 80%);
+}
+
+/* ----- UI fragments ----- */
+.gate-world {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.frag {
+  position: absolute;
+  margin: 0;
+  transform: translate3d(calc(var(--mx, 0) * var(--d, 8) * 1px), calc(var(--my, 0) * var(--d, 8) * 1px), 0);
+  transition: transform 0.9s var(--ease);
+  animation: frag-in 1.5s var(--ease) backwards;
+  animation-delay: calc(0.25s + var(--i, 0) * 0.14s);
+}
+
+@keyframes frag-in {
+  from {
+    opacity: 0;
+    translate: 0 46px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.frag-in {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--ar, 1.55);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0b1424;
+  rotate: var(--rot, 0deg);
+  box-shadow: 0 50px 90px -34px rgba(0, 0, 0, 0.9);
+  animation: gate-float var(--fd, 12s) ease-in-out infinite;
+  transition: scale 0.7s var(--ease), border-color 0.5s, box-shadow 0.7s var(--ease);
+}
+
+@keyframes gate-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+.frag-in img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--op, 50% 50%);
+  transform: scale(var(--zoom, 1));
+  transform-origin: var(--op, 50% 50%);
+}
+
+/* resting dimness (also the "brighten" on hover) is an overlay -> opacity only */
+.frag-in::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #03070d;
+  opacity: 0.56;
+  transition: opacity 0.7s var(--ease);
+  pointer-events: none;
+}
+
+.gate:not([data-hot=""]) .frag:not(:hover) .frag-in::after {
+  opacity: 0.78;
+}
+
+.frag:hover .frag-in {
+  scale: 1.022;
+  border-color: rgba(106, 166, 255, 0.55);
+  box-shadow: 0 60px 100px -34px rgba(0, 0, 0, 0.9), 0 0 80px -20px rgba(47, 123, 255, 0.55);
+}
+
+.frag:hover .frag-in::after {
+  opacity: 0;
+}
+
+.frag-tag {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 36px 18px 16px;
+  background: linear-gradient(to top, rgba(3, 7, 13, 0.88), rgba(3, 7, 13, 0));
+  opacity: 0;
+  translate: 0 8px;
+  transition: opacity 0.45s var(--ease), translate 0.6s var(--ease);
+}
+
+.frag:hover .frag-tag {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.frag-tag b {
+  font: 800 13px var(--mono);
+  letter-spacing: 0.16em;
+}
+
+.frag-tag small {
+  font: 700 10.5px var(--mono);
+  letter-spacing: 0.2em;
+  color: var(--blue-2);
+}
+
+.f-dash {
+  --d: 16;
+  --rot: -2deg;
+  --ar: 1.6;
+  --zoom: 1.12;
+  --op: 30% 30%;
+  --fd: 13s;
+  right: -17vw;
+  top: 9vh;
+  width: 54vw;
+  z-index: 3;
+}
+
+.f-dash .frag-in {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 26%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 26%);
+}
+
+.f-report {
+  --d: 12;
+  --rot: -2.4deg;
+  --ar: 1.45;
+  --zoom: 1.1;
+  --op: 50% 25%;
+  --fd: 11s;
+  right: 4vw;
+  bottom: -20vh;
+  width: 31vw;
+  z-index: 4;
+}
+
+.f-app {
+  --d: 10;
+  --rot: 2.2deg;
+  --ar: 1.5;
+  --zoom: 1.15;
+  --op: 40% 35%;
+  --fd: 14s;
+  left: -8vw;
+  bottom: -13vh;
+  width: 38vw;
+  z-index: 2;
+}
+
+.f-ops {
+  --d: 5;
+  --rot: 1.6deg;
+  --ar: 1.6;
+  --zoom: 1.05;
+  --fd: 16s;
+  left: 4vw;
+  top: -9vh;
+  width: 30vw;
+  z-index: 1;
+}
+
+.f-ops .frag-in::after {
+  opacity: 0.66;
+}
+
+/* ----- light + legibility ----- */
+.gate-spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 640px;
+  height: 640px;
+  background: radial-gradient(closest-side, rgba(130, 176, 255, 0.17), rgba(130, 176, 255, 0) 70%);
+  transform: translate3d(calc(var(--px, 50vw) - 320px), calc(var(--py, 40vh) - 320px), 0);
+  opacity: 0;
+  transition: opacity 0.8s;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.gate:hover .gate-spot {
+  opacity: 1;
+}
+
+.gate-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse 44% 42% at 50% 50%, rgba(3, 7, 13, 0.9) 0%, rgba(3, 7, 13, 0.6) 58%, rgba(3, 7, 13, 0) 100%);
+}
+
+/* ----- copy ----- */
+.gate-name {
+  position: absolute;
+  top: 28px;
+  left: var(--gutter);
+  z-index: 6;
+  font: 800 15px/1 var(--mono);
+  letter-spacing: 0.24em;
+}
+
+.gate-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--gutter);
+  text-align: center;
+  pointer-events: none;
+}
+
+.gate-text {
+  transition: opacity 0.4s var(--ease);
+}
+
+.gate-eyebrow {
+  margin-bottom: 26px;
+  font: 700 12.5px/1.5 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--blue-2);
+}
+
+.gate h1 {
+  font-size: clamp(38px, 5.4vw, 92px);
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+.gate h1 .accent {
+  background: linear-gradient(100deg, #6aa6ff 10%, #2f7bff 55%, #8aa4ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gate-cta {
+  margin-top: clamp(36px, 7vh, 72px);
+  pointer-events: auto;
+}
+
+.gate-foot,
+.gate-note {
+  position: absolute;
+  bottom: 28px;
+  z-index: 6;
+  font: 700 11px/1 var(--mono);
+  letter-spacing: 0.24em;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.gate-foot {
+  left: 50%;
+  translate: -50% 0;
+}
+
+.gate-note {
+  right: var(--gutter);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ----- JOIN ----- */
+.join {
+  --jx: 0px;
+  --jy: 0px;
+  position: relative;
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  transform: translate3d(var(--jx), var(--jy), 0);
+  transition: transform 0.35s var(--ease);
+}
+
+.join-glow {
+  position: absolute;
+  inset: -110px -190px;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgba(47, 123, 255, 0.5), rgba(47, 123, 255, 0) 70%);
+  opacity: calc(0.45 + var(--glow, 0) * 0.55);
+  transition: opacity 0.6s var(--ease);
+  pointer-events: none;
+}
+
+.join-ring {
+  position: absolute;
+  inset: -12px;
+  border-radius: 999px;
+  border: 1px solid rgba(130, 176, 255, 0.34);
+  animation: join-ring 3.4s ease-in-out infinite;
+  transition: border-color 0.4s, inset 0.5s var(--ease);
+  pointer-events: none;
+}
+
+@keyframes join-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.07);
+    opacity: 0.35;
+  }
+}
+
+.join-core {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding: 23px 50px 23px 56px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3f88ff, #2358d8);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset, 0 24px 60px -18px rgba(47, 123, 255, 0.85);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  transition: letter-spacing 0.5s var(--ease), box-shadow 0.5s var(--ease), transform 0.35s var(--ease);
+}
+
+.join-core svg {
+  transition: transform 0.45s var(--ease);
+}
+
+.join:hover .join-core,
+.join.near .join-core,
+.join:focus-visible .join-core {
+  letter-spacing: 0.38em;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.34) inset, 0 0 0 6px rgba(106, 166, 255, 0.16), 0 28px 70px -16px rgba(47, 123, 255, 0.95);
+}
+
+.join:hover .join-core svg,
+.join.near .join-core svg,
+.join:focus-visible .join-core svg {
+  transform: translateX(7px);
+}
+
+.join:hover .join-ring,
+.join.near .join-ring,
+.join:focus-visible .join-ring {
+  inset: -16px;
+  border-color: rgba(160, 196, 255, 0.7);
+}
+
+.join:active .join-core {
+  transform: scale(0.97);
+}
+
+.join:focus-visible {
+  outline: none;
+}
+
+.join:focus-visible .join-ring {
+  border-color: #fff;
+  border-width: 2px;
+}
+
+/* ----- JOIN pressed: world drifts outward in depth, copy fades ----- */
+.gate.joining .frag {
+  opacity: 0;
+  scale: 1.16;
+  transition: opacity 0.7s var(--ease), scale 0.9s var(--ease), translate 0.9s var(--ease);
+}
+
+.gate.joining .f-dash { translate: 70px -24px; }
+.gate.joining .f-report { translate: 50px 46px; }
+.gate.joining .f-app { translate: -60px 40px; }
+.gate.joining .f-ops { translate: -50px -34px; }
+
+.gate.joining .gate-text {
+  opacity: 0;
+}
+
+.gate.joining .join-core {
+  transform: scale(0.96);
+}
+
+/* ===== mobile: no pointer, so the world floats on its own ===== */
+@media (max-width: 820px) {
+  .gate {
+    min-height: 520px;
+  }
+
+  .gate h1 {
+    font-size: clamp(34px, 10.6vw, 54px);
+  }
+
+  .gate-eyebrow {
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+  }
+
+  .gate-spot {
+    display: none;
+  }
+
+  .f-ops {
+    display: none;
+  }
+
+  .f-dash {
+    right: -34vw;
+    top: 6svh;
+    width: 92vw;
+  }
+
+  .f-app {
+    left: -16vw;
+    bottom: 2svh;
+    width: 62vw;
+  }
+
+  .f-report {
+    right: -14vw;
+    bottom: -5svh;
+    width: 56vw;
+  }
+
+  .frag-in::after {
+    opacity: 0.5;
+  }
+
+  .gate-veil {
+    background: radial-gradient(ellipse 80% 34% at 50% 50%, rgba(3, 7, 13, 0.9) 0%, rgba(3, 7, 13, 0.55) 60%, rgba(3, 7, 13, 0) 100%);
+  }
+
+  .join-core {
+    padding: 20px 42px 20px 48px;
+    font-size: 16px;
+  }
+
+  .gate-note {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frag,
+  .frag-in {
+    transform: none;
+    animation: none !important;
+  }
+
+  .gate-spot {
+    display: none;
+  }
+}

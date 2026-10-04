@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { useReducedMotion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react";
-import { projects, showreel } from "./data";
-import { CountUp, Magnetic, Shot, scrollToSection, useHoverCapable, useMedia, usePointerVars } from "./ui";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { projectPath, projects, showreel } from "./data";
+import { TLink } from "./transition";
+import { Shot, useMedia } from "./ui";
 
 const byId = Object.fromEntries(projects.map((p) => [p.id, p]));
 
@@ -12,7 +11,7 @@ const byId = Object.fromEntries(projects.map((p) => [p.id, p]));
 function HeroWindow({ projectId, src, label, className, alt, eager }) {
   return (
     <div className={`layer ${className}`}>
-      <Link className="win" to={`/projects/${projectId}`} aria-label={`${label} 케이스 스터디 보기`}>
+      <TLink className="win" to={projectPath(projectId)} kind="expand" tone="work" aria-label={`${label} 케이스 스터디 보기`}>
         <span className="win-bar">
           <i />
           <i />
@@ -20,108 +19,21 @@ function HeroWindow({ projectId, src, label, className, alt, eager }) {
           <b>{label}</b>
         </span>
         <Shot src={src} alt={alt} sizes="(min-width: 1280px) 760px, 90vw" eager={eager} />
-      </Link>
+      </TLink>
     </div>
   );
 }
 
-function HeroScene() {
+export function HeroScene({ compact = false }) {
   return (
-    <div className="scene" role="group" aria-label="Inspection App, Inspection Operations Dashboard, Report Generator, One Ops 제품 화면 (sanitized demo data)">
+    <div className={`scene${compact ? " compact" : ""}`} role="group" aria-label="Inspection App, Inspection Operations Dashboard, Report Generator, One Ops 제품 화면 (sanitized demo data)">
       <div className="scene-tilt">
-        <HeroWindow className="l-ops" projectId="one-ops" label="One Ops" src={projects[3].image} alt="One Ops 본사 통합 현황 화면 (mock data)" />
+        {!compact && <HeroWindow className="l-ops" projectId="one-ops" label="One Ops" src={projects[3].image} alt="One Ops 본사 통합 현황 화면 (mock data)" />}
         <HeroWindow className="l-dash" projectId="inspection-dashboard" label="Operations Dashboard" src={projects[1].image} alt="Inspection Operations Dashboard 화면 (sanitized demo data)" eager />
         <HeroWindow className="l-report" projectId="report-generator" label="Report Generator" src={projects[2].image} alt="Report Generator 화면 (sanitized demo data)" />
         <HeroWindow className="l-app" projectId="inspection-app" label="Inspection App" src={projects[0].image} alt="Inspection App 화면 (sanitized demo data)" />
       </div>
       <span className="scene-note">SANITIZED DEMO DATA · UI SHOWN WITH MOCK DATA</span>
-    </div>
-  );
-}
-
-export function Hero() {
-  const ref = useRef(null);
-  const reduce = useReducedMotion();
-  const hover = useHoverCapable();
-  usePointerVars(ref, { enabled: hover && !reduce });
-
-  return (
-    <section className="hero dark" id="home" ref={ref}>
-      <div className="hero-bg" aria-hidden="true">
-        <i className="aurora a1" />
-        <i className="aurora a2" />
-        <i className="aurora a3" />
-        <div className="grid-bg" />
-        <div className="noise" />
-      </div>
-      <div className="wrap hero-inner">
-        <div className="hero-copy">
-          <p className="hero-eyebrow rise" style={{ "--i": 0 }}>
-            Product · Operations · Retail · Automation
-          </p>
-          <h1>
-            <span className="line"><span className="rise" style={{ "--i": 1 }}>현장의 문제를</span></span>
-            <span className="line"><span className="rise accent" style={{ "--i": 2 }}>데이터와 제품으로</span></span>
-            <span className="line"><span className="rise" style={{ "--i": 3 }}>해결합니다.</span></span>
-          </h1>
-          <p className="hero-sub rise" style={{ "--i": 4 }}>
-            리테일 현장에서 발견한 비효율을 그냥 두지 않고,
-            <br />
-            직접 시스템을 만들어 운영까지 연결해온 최승호입니다.
-          </p>
-          <div className="hero-cta rise" style={{ "--i": 5 }}>
-            <Magnetic>
-              <button className="btn primary" onClick={() => scrollToSection("work")}>
-                VIEW SELECTED WORK <ChevronRight size={18} />
-              </button>
-            </Magnetic>
-            <button className="btn ghost" onClick={() => scrollToSection("about")}>
-              ABOUT ME
-            </button>
-          </div>
-        </div>
-        <HeroScene />
-      </div>
-      <HeroKpi />
-    </section>
-  );
-}
-
-function HeroKpi() {
-  return (
-    <div className="wrap hero-kpi-wrap">
-      <dl className="hero-kpi rise" style={{ "--i": 7 }}>
-        <div className="kpi-item">
-          <dt>검품률 향상</dt>
-          <dd className="kpi-value">
-            <span>3~5%</span>
-            <ArrowRight size={20} className="kpi-arrow" aria-hidden="true" />
-            <span className="blue">6~8%</span>
-          </dd>
-        </div>
-        <div className="kpi-item">
-          <dt>업무시간 절감</dt>
-          <dd className="kpi-value">
-            <span>일</span>{" "}
-            <span className="blue"><CountUp to={4} /></span>
-            <span className="unit">시간</span>
-          </dd>
-        </div>
-        <div className="kpi-item">
-          <dt>리테일 경력</dt>
-          <dd className="kpi-value">
-            <span><CountUp to={8} /></span>
-            <span className="unit">년+</span>
-          </dd>
-        </div>
-        <div className="kpi-item">
-          <dt>직접 구축 제품</dt>
-          <dd className="kpi-value">
-            <span>4</span>
-            <span className="unit">개</span>
-          </dd>
-        </div>
-      </dl>
     </div>
   );
 }
@@ -134,9 +46,11 @@ function ReelTile({ item, index, clone }) {
   const project = byId[item.projectId];
   return (
     <li className={`reel-tile size-${item.size}`} style={{ "--ry": `${TILT[index % TILT.length]}deg` }} aria-hidden={clone || undefined}>
-      <Link
+      <TLink
         className="reel-link"
-        to={`/projects/${project.id}`}
+        to={projectPath(project.id)}
+        kind="expand"
+        tone="work"
         tabIndex={clone ? -1 : undefined}
         aria-label={`${project.english} — ${item.caption}. 케이스 스터디 보기`}
       >
@@ -149,7 +63,7 @@ function ReelTile({ item, index, clone }) {
             EXPLORE CASE STUDY <ArrowRight size={14} />
           </b>
         </span>
-      </Link>
+      </TLink>
       {project.demoUrl && (
         <a className="reel-demo" href={project.demoUrl} target="_blank" rel="noreferrer" tabIndex={clone ? -1 : undefined}>
           DEMO <ArrowUpRight size={12} />

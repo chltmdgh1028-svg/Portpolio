@@ -36,10 +36,10 @@
       imagesizes="(min-width: 1280px) 760px, 90vw"
     />
     <script>
-      // Clean case-study paths (/projects/inspection-app) map onto the hash router.
+      // Legacy links: /#/projects/<id> (old hash router) and /projects/<id> -> /main/work/<id>
       (function () {
-        var m = location.pathname.match(/^\/projects\/([\w-]+)\/?$/);
-        if (m) location.replace("/#/projects/" + m[1]);
+        var m = location.hash.match(/^#\/projects\/([\w-]+)/);
+        if (m) location.replace("/main/work/" + m[1]);
       })();
     </script>
   </head>

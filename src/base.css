@@ -260,9 +260,6 @@ ol {
 }
 
 .brand {
-  background: none;
-  border: 0;
-  padding: 0;
   font-weight: 800;
   font-size: 17px;
   letter-spacing: 0.16em;
@@ -273,10 +270,8 @@ ol {
   gap: clamp(18px, 2.6vw, 40px);
 }
 
-.desktop-nav button {
+.desktop-nav a {
   position: relative;
-  background: none;
-  border: 0;
   padding: 8px 0;
   font-size: 13px;
   font-weight: 600;
@@ -285,7 +280,7 @@ ol {
   transition: color 0.25s;
 }
 
-.desktop-nav button::after {
+.desktop-nav a::after {
   content: "";
   position: absolute;
   left: 0;
@@ -298,13 +293,13 @@ ol {
   transition: transform 0.4s var(--ease);
 }
 
-.desktop-nav button:hover,
-.desktop-nav button.active {
+.desktop-nav a:hover,
+.desktop-nav a.active {
   color: #fff;
 }
 
-.desktop-nav button:hover::after,
-.desktop-nav button.active::after {
+.desktop-nav a:hover::after,
+.desktop-nav a.active::after {
   transform: scaleX(1);
 }
 
@@ -555,17 +550,157 @@ ol {
   font-size: 13px;
 }
 
-.site-footer .wrap {
+.footer-grid {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 16px 32px;
   flex-wrap: wrap;
 }
 
-.site-footer span {
+.footer-brand {
   font-weight: 800;
   letter-spacing: 0.16em;
   color: #fff;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 0.25s;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+.footer-links .off {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.route-fallback {
+  min-height: 100svh;
+  background: var(--navy);
+}
+
+/* ===== page transition overlay ===== */
+.ov {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: all;
+  overflow: hidden;
+}
+
+.ov-portal .ov-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #050b16 0%, #050b16 100%);
+  box-shadow: 0 0 0 1px rgba(130, 176, 255, 0.55), 0 0 90px 10px rgba(47, 123, 255, 0.5);
+  transform: scale(0.02);
+  animation: portal-grow 0.72s var(--ease) forwards;
+  will-change: transform;
+}
+
+@keyframes portal-grow {
+  to {
+    transform: scale(1);
+  }
+}
+
+.ov-expand {
+  background: var(--navy);
+  clip-path: inset(var(--t) var(--r) var(--b) var(--l) round 28px);
+  animation: ov-expand 0.64s var(--ease) forwards;
+}
+
+.ov-expand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 20% 20%, rgba(47, 123, 255, 0.32), transparent 70%);
+}
+
+.ov-expand.tone-impact::before {
+  background: radial-gradient(ellipse 70% 60% at 25% 25%, rgba(34, 160, 255, 0.34), transparent 70%);
+}
+
+.ov-expand.tone-experience::before {
+  background: radial-gradient(ellipse 70% 60% at 25% 25%, rgba(120, 140, 200, 0.3), transparent 70%);
+}
+
+.ov-expand.tone-profile::before {
+  background: radial-gradient(ellipse 70% 60% at 25% 25%, rgba(124, 92, 255, 0.34), transparent 70%);
+}
+
+@keyframes ov-expand {
+  to {
+    clip-path: inset(0 0 0 0 round 0px);
+  }
+}
+
+.ov-title {
+  position: absolute;
+  font-size: clamp(40px, 6vw, 88px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #fff;
+}
+
+.ov-fade {
+  background: var(--navy);
+  animation: c-fade-in 0.2s ease forwards;
+}
+
+@keyframes c-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ov.out {
+  pointer-events: none;
+  animation: ov-out 0.45s var(--ease) forwards;
+}
+
+.ov-expand.out {
+  clip-path: inset(0 0 0 0 round 0px);
+  animation: ov-out 0.42s var(--ease) forwards;
+}
+
+.ov-fade.out {
+  animation: ov-out 0.3s ease forwards;
+}
+
+.ov-portal.out .ov-circle {
+  animation: none;
+  transform: scale(1);
+}
+
+@keyframes ov-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* new route content waits (paused at its first frame) until the cover starts to lift */
+body[data-covering] .rise,
+body[data-covering] .win,
+body[data-covering] .layer,
+body[data-covering] .frag {
+  animation-play-state: paused;
 }
 
 /* ===== responsive header ===== */
@@ -587,7 +722,7 @@ ol {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .mobile-nav > button {
+  .mobile-nav > a {
     text-align: left;
     background: none;
     border: 0;
@@ -599,7 +734,7 @@ ol {
     color: rgba(255, 255, 255, 0.78);
   }
 
-  .mobile-nav > button.active {
+  .mobile-nav > a.active {
     color: var(--blue-2);
   }
 

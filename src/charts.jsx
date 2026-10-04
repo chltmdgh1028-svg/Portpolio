@@ -65,7 +65,6 @@ export function ColumnChart({ cols, yMax, ticks, fmtTick, ariaLabel, range = fal
   const uid = useId().replace(/:/g, "");
   const { ref, run, onPointerEnter } = useChartPlay({ external });
   const [active, setActive] = useState(null);
-  const pointer = useRef("mouse");
   const y = (v) => Y0 - (v / yMax) * PLOT_H;
   const colIndex = { before: 0, after: 1 };
 
@@ -119,14 +118,13 @@ export function ColumnChart({ cols, yMax, ticks, fmtTick, ariaLabel, range = fal
                 tabIndex={0}
                 role="group"
                 aria-label={`${c.name} ${c.label}`}
-                onPointerDown={(e) => (pointer.current = e.pointerType)}
                 onPointerEnter={(e) => e.pointerType === "mouse" && setActive(c.key)}
                 onPointerLeave={(e) => e.pointerType === "mouse" && setActive(null)}
                 onFocus={() => setActive(c.key)}
                 onBlur={() => setActive(null)}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActive((a) => (pointer.current === "mouse" ? c.key : a === c.key ? null : c.key));
+                  setActive(c.key);
                 }}
               >
                 <rect className="hit" x={x - 10} y={y(c.hi) - 40} width={CW + 20} height={Y0 - y(c.hi) + 40} />
@@ -259,7 +257,7 @@ export function RankChart({ tone }) {
           onPointerLeave={(e) => e.pointerType === "mouse" && setActive(null)}
           onClick={(e) => {
             e.stopPropagation();
-            setActive((a) => (a === "before" ? null : "before"));
+            setActive("before");
           }}
           onFocus={() => setActive("before")}
           onBlur={() => setActive(null)}
@@ -274,7 +272,7 @@ export function RankChart({ tone }) {
           onPointerLeave={(e) => e.pointerType === "mouse" && setActive(null)}
           onClick={(e) => {
             e.stopPropagation();
-            setActive((a) => (a === "after" ? null : "after"));
+            setActive("after");
           }}
           onFocus={() => setActive("after")}
           onBlur={() => setActive(null)}

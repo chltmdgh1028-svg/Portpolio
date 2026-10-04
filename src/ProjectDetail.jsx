@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Lock } from "lucide-react";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import { projects } from "./data";
+import { projectPath, projects } from "./data";
+import { TLink } from "./transition";
 import { ClipReveal, Reveal, Shot, scrollToSection } from "./ui";
 import "./detail.css";
 
@@ -48,7 +49,6 @@ function useActiveChapter(keys) {
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const index = Math.max(0, projects.findIndex((item) => item.id === id));
   const project = projects[index];
   const next = projects[(index + 1) % projects.length];
@@ -140,11 +140,11 @@ export default function ProjectDetail() {
         </div>
         <div className="wrap cs-hero-inner">
           <div className="cs-copy">
-            <button className="cs-back" onClick={() => navigate("/", { state: { scrollTo: `work-${project.id}` } })}>
-              <ArrowLeft size={16} /> ALL WORK
-            </button>
+            <TLink className="cs-back" to="/main/work" kind="fade">
+              <ArrowLeft size={16} /> WORK
+            </TLink>
             <p className="cs-kicker rise" style={{ "--i": 0 }}>
-              <span>No. {project.no}</span>
+              <span>{project.no}</span>
               <i aria-hidden="true" />
               <span>{project.kicker}</span>
             </p>
@@ -230,8 +230,8 @@ export default function ProjectDetail() {
 
       <section className="cs-next dark" style={{ "--accent": next.accent }}>
         <div className="wrap">
-          <p className="section-eyebrow">Next Case Study</p>
-          <Link className="cs-next-link" to={`/projects/${next.id}`}>
+          <p className="section-eyebrow">Next Case →</p>
+          <TLink className="cs-next-link" to={projectPath(next.id)} kind="expand" tone="work">
             <span>
               <small>
                 {next.no} · {next.kicker}
@@ -245,7 +245,7 @@ export default function ProjectDetail() {
             <ClipReveal className="cs-next-shot">
               <Shot src={next.image} alt="" sizes="(min-width: 1100px) 520px, 80vw" />
             </ClipReveal>
-          </Link>
+          </TLink>
         </div>
       </section>
 

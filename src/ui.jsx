@@ -247,3 +247,9 @@ export function scrollToSection(id) {
   el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   return true;
 }
+
+export function useDocTitle(title) {
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+}
