@@ -39,6 +39,7 @@ export default function ProjectDetail() {
             <p className="detail-english">{project.english}</p>
             <strong className="detail-result">{project.result}</strong>
             <p className="detail-one">{project.oneLine}</p>
+            <ul className="focus-chips">{project.focus.map((f) => <li key={f}>{f}</li>)}</ul>
             {project.demoUrl && (
               <a className="btn primary" href={project.demoUrl} target="_blank" rel="noreferrer">VIEW DEMO <ExternalLink size={15} /></a>
             )}
@@ -51,6 +52,14 @@ export default function ProjectDetail() {
             {project.imageNote && <span className="image-note static">{project.imageNote}</span>}
           </div>
         </section>
+
+        {project.caseStudy.flow && (
+          <ol className="case-flow" aria-label="프로젝트 진행 흐름">
+            {project.caseStudy.flow.map((step, i) => (
+              <li key={step}><span>{String(i + 1).padStart(2, "0")}</span>{step}</li>
+            ))}
+          </ol>
+        )}
 
         <section className="case-grid">
           {cases.map(([title, body]) => (

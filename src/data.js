@@ -19,9 +19,18 @@ export const screens = {
   inspectionAppAnalysis: "/screens/inspection-app-analysis.webp",
   dashboard: "/screens/inspection-dashboard.webp",
   dashboardHistory: "/screens/inspection-dashboard-history.webp",
+  dashboardProducts: "/screens/inspection-dashboard-products.webp",
   reportGenerator: "/screens/report-generator-wizard.webp",
   oneOps: "/screens/one-ops-hq.webp",
 };
+
+// How the four products connect: capture -> monitor -> report -> expand.
+export const projectStory = [
+  { id: "inspection-app", step: "01", name: "Inspection App", role: "현장에서 검품 데이터를 생성" },
+  { id: "inspection-dashboard", step: "02", name: "Inspection Operations Dashboard", role: "누적된 데이터를 운영 관점에서 분석·모니터링" },
+  { id: "report-generator", step: "03", name: "Report Generator", role: "데이터를 보고서·의사결정 자료로 자동 변환" },
+  { id: "one-ops", step: "04", name: "One Ops", role: "더 넓은 운영 프로세스로 확장" },
+];
 
 export const gsData = {
   inspectionRate: [
@@ -38,7 +47,7 @@ export const gsData = {
   // What was built — shown instead of internal operating figures.
   scope: [
     { name: "Inspection App", desc: "현장 검품 입력 · 기준 · 사진 기록" },
-    { name: "Inspection Dashboard", desc: "검품 현황 · 추이 · 협력사 이력" },
+    { name: "Inspection Operations Dashboard", desc: "품질 이슈 · 이력 · 운영 상태 모니터링" },
     { name: "Report Generator", desc: "PPT · 엑셀 보고서 자동 생성" },
     { name: "H-100F 연동", desc: "비파괴 당도계를 검품 흐름에 연결" },
   ],
@@ -62,6 +71,8 @@ export const projects = [
     id: "inspection-app",
     title: "신선상품 검품 시스템",
     english: "Inspection App",
+    storyStep: "01 · CAPTURE",
+    focus: ["Field Operations", "Process Standardization", "Internal Tool"],
     statusLabel: "PRODUCTION · SANITIZED DEMO",
     oneLine: "현장에서 바로 쓰는 신선상품 검품 PDA 웹앱",
     problem: "검품 기준, 수량, 사진 기록이 흩어져 담당자별 편차와 누락이 발생했습니다.",
@@ -78,38 +89,44 @@ export const projects = [
     caseStudy: {
       why: "검품 결과가 사람마다 다르게 기록되면 협력사 품질 관리 자체가 흔들립니다. 먼저 기준과 기록 방식을 하나로 맞춰야 했습니다.",
       process: "현장 검품 동선 관찰 → 입력 항목 최소화 → 프로토타입 → 담당자 피드백 → 운영 적용 순서로 반복했습니다.",
+      flow: ["현장 문제", "기준 정리", "입력 UI 설계", "현장 적용", "데이터 축적"],
     },
   },
   {
     id: "inspection-dashboard",
-    title: "Inspection Dashboard",
-    english: "Inspection Dashboard",
+    title: "신선상품 품질 운영 Control Tower",
+    english: "Inspection Operations Dashboard",
+    storyStep: "02 · MONITOR",
     statusLabel: "PRODUCTION · SANITIZED DEMO",
-    oneLine: "신선식품 검품 데이터를 한눈에 보는 운영 대시보드",
-    problem: "검품 데이터가 쌓여도 당일 운영 판단에 바로 쓰기 어려웠습니다.",
-    purpose: "쌓인 검품 데이터를 빠르게 읽고 협력사별 실행 수준을 확인하도록 구성했습니다.",
+    oneLine: "분산된 검품 데이터를 통합해 품질 이슈와 운영 상태를 한눈에 추적하는 현장 Operations Dashboard",
+    focus: ["Operations Improvement", "Product Operations", "Quality Operations", "Internal Tool", "Data-driven Operations", "Process Innovation / DX"],
+    problem: "검품 기록·사진·이력이 흩어져 있어 품질 이슈와 협력사별 추이를 당일 운영 판단으로 연결하기 어려웠습니다.",
+    purpose: "검품 현황, 상품별 품질 이슈, 이력, 사진, 데이터 상태를 하나의 화면에서 추적해 현장 운영 의사결정을 지원합니다.",
     tech: ["React", "Recharts", "Tailwind", "Vercel"],
     image: screens.dashboard,
-    imageAlt: "Inspection Dashboard 샘플 데이터 화면 — 검품 현황, 추이, 주요 이슈",
-    gallery: [screens.dashboard, screens.dashboardHistory],
+    imageAlt: "Inspection Operations Dashboard 데모 화면 — 검품 현황, 추이, 주요 이슈 (샘플 데이터)",
+    gallery: [screens.dashboard, screens.dashboardHistory, screens.dashboardProducts],
     imageNote: "SANITIZED DEMO DATA",
-    demoNote: "사내 운영 서비스 · 공개 데모 없음",
+    demoUrl: "https://inspection-dashboard-demo.vercel.app/",
     accent: "#4f6bff",
-    result: "검품 현황을 한눈에",
+    result: "운영 의사결정 지원",
     metrics: [
-      "검품 현황 · 추이 · 주요 이슈를 한 화면에서 확인",
-      "검품 이력, 캘린더, 상품 분석, 사진 아카이브, 해피콜 화면 구성",
-      "협력사별 품질 이력 확인",
+      "검품 현황 · 상품별 품질 이슈 · 협력사 추이를 한 화면에서 모니터링",
+      "검품 이력 · 캘린더 · 상품 분석 · 사진 아카이브 · 데이터 상태 화면 구성",
+      "읽기 전용 sanitized 데모 제공 (mock 데이터, 운영 시스템과 분리)",
     ],
     caseStudy: {
-      why: "데이터가 있어도 의사결정에 쓰이지 않으면 의미가 없습니다. 당일 운영에서 바로 볼 수 있는 형태가 필요했습니다.",
-      process: "검품 앱 데이터 구조 정리 → 핵심 지표 정의 → 대시보드 설계 → 사내 운영 서비스로 배포 순서로 진행했습니다.",
+      why: "데이터가 쌓여도 운영 판단에 쓰이지 않으면 의미가 없습니다. 현장에서 만든 검품 기록을 품질 이슈 중심으로 다시 묶어, 담당자가 당일 무엇을 먼저 봐야 하는지 알 수 있어야 했습니다.",
+      process: "검품 앱 데이터 구조 정리 → 운영 관점의 핵심 지표(검품률·불량률·이슈 등급) 정의 → 이슈·이력·사진·데이터 상태를 한 흐름으로 설계 → 사내 운영 서비스로 배포·개선 순서로 진행했습니다.",
+      flow: ["현장 문제", "데이터 축적", "Dashboard 통합", "운영 모니터링", "의사결정 · 보고"],
     },
   },
   {
     id: "report-generator",
     title: "보고서 자동 생성기",
     english: "Report Generator",
+    storyStep: "03 · REPORT",
+    focus: ["Reporting Automation", "Operations Efficiency", "Internal Tool"],
     statusLabel: "INTERNAL TOOL · DEMO",
     oneLine: "검품 데이터에서 보고서까지 한 번에 만드는 자동화 도구",
     problem: "매일 반복되는 보고서 정리와 공유에 많은 시간이 소요됐습니다.",
@@ -126,12 +143,15 @@ export const projects = [
     caseStudy: {
       why: "보고서의 내용보다 취합과 서식 맞추기에 시간이 더 들었습니다. 사람이 판단할 부분과 기계가 만들 부분을 분리했습니다.",
       process: "보고서 항목 표준화 → 데이터 집계 로직 → 사진 배치/캡션 규칙 → PPT·엑셀 템플릿 → 담당자 확인 단계 추가 순서로 만들었습니다.",
+      flow: ["반복 보고", "항목 표준화", "자동 생성", "담당자 확인", "공유"],
     },
   },
   {
     id: "one-ops",
     title: "One Ops",
     english: "One Ops",
+    storyStep: "04 · EXPAND",
+    focus: ["Process Innovation / DX", "Operations Platform", "Product Planning"],
     statusLabel: "PROTOTYPE · MOCK DATA",
     oneLine: "점포·센터·협력사·본사를 잇는 통합 운영/작업관리 플랫폼",
     problem: "운영 이슈와 작업 기록이 채널마다 흩어져 담당자가 바뀌면 맥락이 끊겼습니다.",
@@ -152,6 +172,7 @@ export const projects = [
     caseStudy: {
       why: "현장 시스템이 따로 움직이면 본사는 결과만 보고, 현장은 이유를 설명해야 합니다. 같은 데이터를 역할별로 다르게 보여주는 구조가 필요했습니다.",
       process: "역할별 업무 정의 → 공통 데이터 모델 → 역할별 라우팅/화면 → 목 데이터 프로토타입 → Supabase 연동 설계 순서로 진행 중입니다.",
+      flow: ["분산된 채널", "역할별 업무 정의", "공통 데이터", "역할별 화면", "통합 현황"],
     },
   },
 ];
@@ -168,7 +189,7 @@ export const careers = [
       { value: "일 4시간", label: "업무시간 절감" },
     ],
     role: ["검품 기준안 수립", "현장 운영 개선", "업무 자동화"],
-    built: ["Inspection App", "Inspection Dashboard", "Report Generator", "H-100F 비파괴 당도계 연동"],
+    built: ["Inspection App", "Inspection Operations Dashboard", "Report Generator", "H-100F 비파괴 당도계 연동"],
     bullets: [
       "검품 시스템을 구축하고 검품 기준안을 수립했습니다.",
       "대시보드와 보고서 생성기로 현황 확인과 보고를 자동화했습니다.",

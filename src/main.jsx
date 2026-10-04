@@ -28,6 +28,7 @@ import {
   emartData,
   gsData,
   navItems,
+  projectStory,
   projects,
   screens,
   sectionToNav,
@@ -250,7 +251,7 @@ function BrowserFrame({ className, label, src, alt, delay = 0 }) {
 function HeroMockup() {
   return (
     <div className="hero-mockup" role="group" aria-label="Inspection App, Inspection Dashboard, Report Generator 화면 (샘플 데이터)">
-      <BrowserFrame className="frame-dashboard" label="Inspection Dashboard" src={screens.dashboard} alt="Inspection Dashboard 샘플 데이터 화면" delay={0.1} />
+      <BrowserFrame className="frame-dashboard" label="Operations Dashboard" src={screens.dashboard} alt="Inspection Operations Dashboard 샘플 데이터 화면" delay={0.1} />
       <BrowserFrame className="frame-report" label="Report Generator" src={screens.reportGenerator} alt="Report Generator 샘플 데이터 화면" delay={0.25} />
       <BrowserFrame className="frame-app" label="Inspection App" src={screens.inspectionApp} alt="Inspection App 샘플 데이터 화면" delay={0.4} />
     </div>
@@ -302,7 +303,16 @@ function ProjectsSection() {
   return (
     <section className="section projects-section" id="projects">
       <div className="wrap">
-        <SectionHeading eyebrow="Featured Projects" title="직접 만든 4개의 제품" desc="현장의 실제 문제를 정의하고, 설계부터 운영까지 직접 맡은 제품들입니다." />
+        <SectionHeading eyebrow="Featured Projects" title="현장 문제에서 운영 시스템으로" desc="현장에서 데이터를 만들고, 모니터링하고, 보고하고, 더 넓은 운영으로 확장해온 네 가지 제품입니다." />
+        <ol className="project-story" aria-label="프로젝트 연결 흐름">
+          {projectStory.map((item, i) => (
+            <Reveal as="li" key={item.id} className="story-node" delay={i * 0.06}>
+              <span className="story-node-no">{item.step}</span>
+              <strong>{item.name}</strong>
+              <p>{item.role}</p>
+            </Reveal>
+          ))}
+        </ol>
         <div className="project-grid">
           {projects.map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} />
@@ -324,9 +334,12 @@ function ProjectCard({ project, index }) {
         {project.imageNote && <span className="image-note">{project.imageNote}</span>}
       </Link>
       <div className="project-body">
-        <span className="status-badge" style={{ "--badge": project.accent }}>
-          <i /> {project.statusLabel}
-        </span>
+        <div className="badge-row">
+          <span className="status-badge" style={{ "--badge": project.accent }}>
+            <i /> {project.statusLabel}
+          </span>
+          <span className="story-step">{project.storyStep}</span>
+        </div>
         <div className="project-head">
           <div>
             <h3>{project.title}</h3>
@@ -335,6 +348,7 @@ function ProjectCard({ project, index }) {
           <span className="project-result" style={{ "--badge": project.accent }}>{project.result}</span>
         </div>
         <p className="one-line">{project.oneLine}</p>
+        <p className="focus-line">{project.focus.slice(0, 4).join(" · ")}</p>
         <dl className="project-facts">
           <div><dt>Problem</dt><dd>{project.problem}</dd></div>
           <div><dt>Purpose</dt><dd>{project.purpose}</dd></div>
