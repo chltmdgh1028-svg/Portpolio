@@ -276,44 +276,107 @@
 }
 
 .reel {
-  display: grid;
-  gap: 6px;
+  position: relative;
   perspective: 1800px;
 }
 
-/* No native scrollbar anywhere: the rail is moved by a transform animation inside an overflow:hidden frame. */
+/* No native scroll anywhere: the rail is an overflow:hidden frame whose track is moved with transform (see useRail). */
 .reel-row {
   overflow: hidden;
   padding: 16px 0 26px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 
-.reel-row::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+.reel-row.dragging {
+  cursor: grabbing;
 }
 
-/* ~58s for one loop of the first row: 30-45px/s, i.e. a full screen takes roughly 30-40s */
+.reel-row.dragging .reel-link {
+  pointer-events: none;
+}
+
 .reel-track {
   display: flex;
   width: max-content;
-  animation: reel-left 58s linear infinite;
   will-change: transform;
 }
 
-.reel-row.reverse .reel-track {
-  animation-direction: reverse;
-  animation-duration: 66s;
+/* previous / next controls: small, sit in the faded edge zones */
+.reel-arrow {
+  position: absolute;
+  top: calc(50% - 10px);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  height: 46px;
+  min-width: 46px;
+  padding: 0 14px;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(7, 14, 28, 0.82);
+  color: #fff;
+  font: 700 12px var(--mono);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.4s var(--ease), gap 0.4s var(--ease), padding 0.4s var(--ease);
 }
 
-@keyframes reel-left {
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
+.reel-arrow.prev {
+  left: clamp(14px, 2.4vw, 40px);
+}
+
+.reel-arrow.next {
+  right: clamp(14px, 2.4vw, 40px);
+}
+
+.reel-arrow span {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width 0.45s var(--ease), opacity 0.3s;
+}
+
+.reel-arrow svg {
+  flex: none;
+  transition: transform 0.4s var(--ease);
+}
+
+.reel-arrow:hover,
+.reel-arrow:focus-visible {
+  gap: 10px;
+  padding: 0 18px;
+  border-color: rgba(106, 166, 255, 0.7);
+  background: rgba(47, 123, 255, 0.28);
+  box-shadow: 0 0 34px -4px rgba(47, 123, 255, 0.7);
+}
+
+.reel-arrow:hover span,
+.reel-arrow:focus-visible span {
+  max-width: 90px;
+  opacity: 1;
+}
+
+.reel-arrow.prev:hover svg,
+.reel-arrow.prev:focus-visible svg {
+  transform: translateX(-3px);
+}
+
+.reel-arrow.next:hover svg,
+.reel-arrow.next:focus-visible svg {
+  transform: translateX(3px);
+}
+
+.reel-arrow:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 .reel-tile {
@@ -581,22 +644,14 @@
     margin: 4px 0 0;
   }
 
-  /* touch rail: swipeable, auto-drift handled in JS at low speed */
+  /* touch rail: swipe (pointer drag) + slow auto-flow, nothing native scrolls so there is no scrollbar */
   .reel-row {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -webkit-mask-image: none;
-    mask-image: none;
-    padding-inline: var(--gutter);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
   }
 
-  .reel-row::-webkit-scrollbar {
+  .reel-arrow {
     display: none;
-  }
-
-  .reel-track {
-    animation: none;
   }
 
   .reel-tile,
@@ -635,11 +690,5 @@
   .scene-tilt,
   .layer {
     transform: none;
-  }
-  .reel-track {
-    animation: none !important;
-  }
-  .reel-row {
-    overflow-x: auto; /* still no visible scrollbar; users can swipe / trackpad-scroll the static rail */
   }
 }

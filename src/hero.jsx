@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { projectPath, projects, showreel } from "./data";
 import { TLink } from "./transition";
 import { useReducedMotion } from "framer-motion";
-import { Shot, useMedia } from "./ui";
+import { Shot } from "./ui";
 
 const byId = Object.fromEntries(projects.map((p) => [p.id, p]));
 
@@ -40,10 +40,12 @@ export function HeroScene({ compact = false }) {
 }
 
 /* ---------- showreel ---------- */
-// A single product-showcase rail: every frame shares one 16:10 box (only the width has a little rhythm),
-// the track is moved with a CSS transform animation, and hovering eases the rail to a stop (and back).
+// One continuous product-showcase rail. There is no native scrolling at all (so no scrollbar):
+// a single rAF loop moves the track with transform, and auto-flow, arrows, drag/swipe, wheel and
+// keyboard focus all feed the same position, so nothing ever jumps. Items are doubled, so the rail is infinite.
 
 const TILT = [-4, 0, 3, -3, 2, -2, 4];
+const RAIL = [0, 1, 2, 3, 5, 4, 6]; // order in data.showreel: featured frames alternate with normal ones
 
 function ReelTile({ item, index, clone }) {
   const project = byId[item.projectId];
@@ -55,12 +57,13 @@ function ReelTile({ item, index, clone }) {
         kind="expand"
         tone="work"
         tabIndex={clone ? -1 : undefined}
+        draggable={false}
         aria-label={`${project.english} — ${item.caption}. 케이스 스터디 보기`}
       >
         <Shot
           src={item.src}
           alt={clone ? "" : `${project.english} 화면 — ${item.caption} (sanitized demo data)`}
-          sizes="(min-width: 1700px) 850px, (min-width: 1280px) 720px, 78vw"
+          sizes="(min-width: 1700px) 800px, (min-width: 1280px) 720px, 78vw"
           style={{ objectPosition: item.pos }}
         />
         <span className="reel-cap">
@@ -73,7 +76,7 @@ function ReelTile({ item, index, clone }) {
         </span>
       </TLink>
       {project.demoUrl && (
-        <a className="reel-demo" href={project.demoUrl} target="_blank" rel="noreferrer" tabIndex={clone ? -1 : undefined}>
+        <a className="reel-demo" href={project.demoUrl} target="_blank" rel="noreferrer" tabIndex={clone ? -1 : undefined} draggable={false}>
           DEMO <ArrowUpRight size={12} />
         </a>
       )}
@@ -81,78 +84,200 @@ function ReelTile({ item, index, clone }) {
   );
 }
 
-/** Touch rail: slow auto-drift that yields to the user's swipe (scrollbar is hidden in CSS). */
-function useAutoDrift(ref, enabled) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !enabled) return undefined;
-    let raf = 0;
-    let pos = el.scrollLeft;
-    let last = performance.now();
-    let paused = false;
-    let visible = true;
-    let timer = 0;
-    const hold = () => {
-      paused = true;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        pos = el.scrollLeft;
-        paused = false;
-      }, 2600);
-    };
-    const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), { threshold: 0.2 });
-    io.observe(el);
-    const tick = (t) => {
-      const dt = Math.min(t - last, 64);
-      last = t;
-      if (!paused && visible) {
-        pos += dt * 0.014;
-        const half = el.scrollWidth / 2;
-        if (pos >= half) pos -= half;
-        el.scrollLeft = pos;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    el.addEventListener("touchstart", hold, { passive: true });
-    el.addEventListener("pointerdown", hold);
-    el.addEventListener("wheel", hold, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(timer);
-      io.disconnect();
-      el.removeEventListener("touchstart", hold);
-      el.removeEventListener("pointerdown", hold);
-      el.removeEventListener("wheel", hold);
-    };
-  }, [ref, enabled]);
-}
+const AUTO_DESKTOP = 44; // px/s -> a full 1440px screen every ~33s
+const AUTO_MOBILE = 16;
 
-/** Eases the CSS animation's playbackRate to 0 on hover/focus and back to 1 on leave (no jump, no per-frame React state). */
-function useRailEase(rowRef, trackRef, enabled) {
+function useRail(frameRef, rowRef, trackRef, reduce) {
+  const api = useRef({ nudge: () => {} });
+
   useEffect(() => {
+    const frame = frameRef.current;
     const row = rowRef.current;
     const track = trackRef.current;
-    if (!row || !track || !enabled) return undefined;
-    let rate = 1;
-    let target = 1;
-    let raf = 0;
-    const step = () => {
-      raf = 0;
-      const anim = track.getAnimations()[0];
-      if (!anim) return;
-      rate += (target - rate) * 0.1;
-      if (Math.abs(target - rate) < 0.01) rate = target;
-      if (anim.updatePlaybackRate) anim.updatePlaybackRate(rate);
-      else anim.playbackRate = rate;
-      if (rate !== target) raf = requestAnimationFrame(step);
+    if (!frame || !row || !track) return undefined;
+    const tiles = [...track.children];
+    const n = tiles.length / 2;
+    let setW = 0;
+    let pitch = 0;
+    const measure = () => {
+      setW = tiles[n].offsetLeft - tiles[0].offsetLeft;
+      pitch = setW / n;
     };
-    const set = (t) => {
-      target = t;
-      if (!raf) raf = requestAnimationFrame(step);
+    measure();
+
+    let pos = 0; // rendered offset
+    let target = 0; // where the spring is heading (arrows / glide / focus add to it)
+    let speed = 1; // eased auto-flow factor: 0 while hovering, dragging or settling a manual move
+    let hovering = false;
+    let dragging = false;
+    let visible = true;
+    let last = performance.now();
+    let raf = 0;
+
+    const tick = (t) => {
+      raf = requestAnimationFrame(tick);
+      const dt = Math.min((t - last) / 1000, 0.05);
+      last = t;
+      if (!visible || !setW) return;
+      const settling = Math.abs(target - pos) > 2;
+      const wantAuto = !reduce && !hovering && !dragging && !settling;
+      speed += ((wantAuto ? 1 : 0) - speed) * (1 - Math.exp(-dt * 5));
+      const auto = (window.innerWidth <= 720 ? AUTO_MOBILE : AUTO_DESKTOP) * speed * dt;
+      pos += auto;
+      target += auto;
+      if (!dragging) {
+        const diff = target - pos;
+        if (Math.abs(diff) < 0.05) pos = target;
+        else pos += diff * (1 - Math.exp(-dt * (reduce ? 26 : 5.5)));
+      }
+      const k = Math.floor(pos / setW);
+      if (k) {
+        pos -= k * setW;
+        target -= k * setW;
+      }
+      track.style.transform = `translate3d(${(-pos).toFixed(2)}px,0,0)`;
+    };
+    raf = requestAnimationFrame(tick);
+
+    api.current.nudge = (dir) => {
+      // clicking repeatedly just extends the target, the spring keeps gliding (capped to 3 cards ahead)
+      const next = target + dir * pitch;
+      target = Math.max(pos - 3 * pitch, Math.min(pos + 3 * pitch, next));
     };
 
-    // cursor depth on the hovered frame (rAF throttled, transform only)
+    /* hover / focus pause (also covers the arrow buttons) */
+    const enter = (e) => {
+      if (e.pointerType === "mouse") hovering = true;
+    };
+    const leave = (e) => {
+      if (e.pointerType === "mouse") hovering = false;
+    };
+    const focusIn = (e) => {
+      hovering = true;
+      const tile = e.target.closest ? e.target.closest(".reel-tile") : null;
+      if (!tile || !e.target.matches || !e.target.matches(":focus-visible")) return;
+      // keyboard focus on a frame that is out of view: bring it to the middle by the shortest way round
+      const want = tile.offsetLeft + tile.offsetWidth / 2 - row.clientWidth / 2;
+      let d = want - target;
+      d -= Math.round(d / setW) * setW;
+      if (Math.abs(d) > 8) target += d;
+    };
+    const focusOut = () => {
+      hovering = false;
+    };
+    frame.addEventListener("pointerenter", enter);
+    frame.addEventListener("pointerleave", leave);
+    frame.addEventListener("focusin", focusIn);
+    frame.addEventListener("focusout", focusOut);
+
+    /* drag / swipe (mouse + touch). Vertical page scroll is left to the browser via touch-action: pan-y. */
+    let down = false;
+    let moved = 0;
+    let lastX = 0;
+    let lastT = 0;
+    let vel = 0;
+    let swallow = false;
+    const onDown = (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      down = true;
+      moved = 0;
+      lastX = e.clientX;
+      lastT = performance.now();
+      vel = 0;
+    };
+    const onMove = (e) => {
+      if (!down) return;
+      const now = performance.now();
+      const dx = e.clientX - lastX;
+      moved += Math.abs(dx);
+      if (!dragging && moved > 6) {
+        dragging = true;
+        row.classList.add("dragging");
+        try {
+          row.setPointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (dragging) {
+        pos -= dx;
+        target -= dx;
+        const dtm = Math.max(now - lastT, 1) / 1000;
+        vel = vel * 0.7 + (-dx / dtm) * 0.3;
+      }
+      lastX = e.clientX;
+      lastT = now;
+    };
+    const onUp = (e) => {
+      if (!down) return;
+      down = false;
+      if (dragging) {
+        dragging = false;
+        row.classList.remove("dragging");
+        swallow = true;
+        setTimeout(() => (swallow = false), 0);
+        try {
+          row.releasePointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+        target = pos + Math.max(-1400, Math.min(1400, vel)) * 0.22; // glide on release
+      }
+    };
+    const onClickCapture = (e) => {
+      if (swallow) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    row.addEventListener("pointerdown", onDown);
+    row.addEventListener("pointermove", onMove);
+    row.addEventListener("pointerup", onUp);
+    row.addEventListener("pointercancel", onUp);
+    row.addEventListener("click", onClickCapture, true);
+
+    /* horizontal wheel / trackpad */
+    const onWheel = (e) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      pos += e.deltaX;
+      target += e.deltaX;
+    };
+    row.addEventListener("wheel", onWheel, { passive: false });
+
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      last = performance.now();
+    });
+    io.observe(frame);
+    const ro = new ResizeObserver(measure);
+    ro.observe(track);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      ro.disconnect();
+      frame.removeEventListener("pointerenter", enter);
+      frame.removeEventListener("pointerleave", leave);
+      frame.removeEventListener("focusin", focusIn);
+      frame.removeEventListener("focusout", focusOut);
+      row.removeEventListener("pointerdown", onDown);
+      row.removeEventListener("pointermove", onMove);
+      row.removeEventListener("pointerup", onUp);
+      row.removeEventListener("pointercancel", onUp);
+      row.removeEventListener("click", onClickCapture, true);
+      row.removeEventListener("wheel", onWheel);
+    };
+  }, [frameRef, rowRef, trackRef, reduce]);
+
+  return api;
+}
+
+/** Cursor depth on the hovered frame (rAF throttled, transform only). */
+function useFrameDepth(rowRef) {
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return undefined;
     let hovered = null;
     let frame = 0;
     let hx = 0;
@@ -181,58 +306,29 @@ function useRailEase(rowRef, trackRef, enabled) {
       hy = ((e.clientY - r.top) / r.height - 0.5) * 2;
       if (!frame) frame = requestAnimationFrame(apply);
     };
-    const enter = (e) => {
-      if (e.pointerType === "mouse") set(0);
-    };
-    const leave = (e) => {
-      if (e.pointerType !== "mouse") return;
-      set(1);
+    const onLeave = () => {
       reset();
       hovered = null;
     };
-    const focusIn = () => set(0);
-    const focusOut = () => set(1);
-    row.addEventListener("pointerenter", enter);
-    row.addEventListener("pointerleave", leave);
     row.addEventListener("pointermove", onMove, { passive: true });
-    row.addEventListener("focusin", focusIn);
-    row.addEventListener("focusout", focusOut);
+    row.addEventListener("pointerleave", onLeave);
     return () => {
-      if (raf) cancelAnimationFrame(raf);
       if (frame) cancelAnimationFrame(frame);
-      row.removeEventListener("pointerenter", enter);
-      row.removeEventListener("pointerleave", leave);
       row.removeEventListener("pointermove", onMove);
-      row.removeEventListener("focusin", focusIn);
-      row.removeEventListener("focusout", focusOut);
+      row.removeEventListener("pointerleave", onLeave);
     };
-  }, [rowRef, trackRef, enabled]);
-}
-
-function ReelRow({ items, reverse, drift, ease, label }) {
-  const ref = useRef(null);
-  const trackRef = useRef(null);
-  useAutoDrift(ref, drift);
-  useRailEase(ref, trackRef, ease);
-  const list = [...items, ...items]; // two copies -> seamless -50% loop
-  return (
-    <div className={`reel-row${reverse ? " reverse" : ""}`} ref={ref} role="region" aria-label={label}>
-      <ul className="reel-track" ref={trackRef}>
-        {list.map((item, i) => (
-          <ReelTile key={`${item.src}-${i}`} item={item} index={i % items.length} clone={i >= items.length} />
-        ))}
-      </ul>
-    </div>
-  );
+  }, [rowRef]);
 }
 
 export function Showreel() {
-  const mobile = useMedia("(max-width: 720px)");
   const reduce = useReducedMotion();
-  const rowA = [showreel[0], showreel[1], showreel[2], showreel[3]];
-  const rowB = [showreel[4], showreel[5], showreel[6], showreel[0]];
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const frameRef = useRef(null);
+  const rowRef = useRef(null);
+  const trackRef = useRef(null);
+  const rail = useRail(frameRef, rowRef, trackRef, reduce);
+  useFrameDepth(rowRef);
+  const items = RAIL.map((i) => showreel[i]);
+  const list = [...items, ...items]; // two copies -> seamless loop
 
   return (
     <section className="showreel dark" id="showreel" aria-label="프로젝트 화면 쇼릴">
@@ -242,15 +338,22 @@ export function Showreel() {
           직접 만든 네 가지 제품의 실제 화면입니다. <span>화면을 누르면 Case Study로 이동합니다.</span>
         </p>
       </div>
-      <div className="reel">
-        {mobile ? (
-          <ReelRow items={[...rowA, ...rowB.slice(0, 3)]} drift={mounted && !reduce} label="제품 화면 모음 (스와이프)" />
-        ) : (
-          <>
-            <ReelRow items={rowA} ease={!reduce} label="제품 화면 1열" />
-            <ReelRow items={rowB} reverse ease={!reduce} label="제품 화면 2열" />
-          </>
-        )}
+      <div className="reel" ref={frameRef}>
+        <div className="reel-row" ref={rowRef} role="region" aria-roledescription="carousel" aria-label="제품 화면 모음">
+          <ul className="reel-track" ref={trackRef}>
+            {list.map((item, i) => (
+              <ReelTile key={`${item.src}-${i}`} item={item} index={i % items.length} clone={i >= items.length} />
+            ))}
+          </ul>
+        </div>
+        <button type="button" className="reel-arrow prev" aria-label="이전 화면" onClick={() => rail.current.nudge(-1)}>
+          <ArrowLeft size={18} aria-hidden="true" />
+          <span aria-hidden="true">이전 화면</span>
+        </button>
+        <button type="button" className="reel-arrow next" aria-label="다음 화면" onClick={() => rail.current.nudge(1)}>
+          <span aria-hidden="true">다음 화면</span>
+          <ArrowRight size={18} aria-hidden="true" />
+        </button>
       </div>
       <p className="wrap reel-note">SANITIZED DEMO DATA · UI SHOWN WITH MOCK DATA — 실제 운영 데이터와 운영 서비스 주소는 공개하지 않습니다.</p>
     </section>
