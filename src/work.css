@@ -1,0 +1,328 @@
+/* ===== selected work ===== */
+.work {
+  position: relative;
+  padding: 110px 0 170px;
+  overflow-x: clip;
+}
+
+.work-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(110px, 13vw, 190px);
+  margin-top: 96px;
+}
+
+.work-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.74fr) minmax(0, 1.26fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 92px);
+}
+
+.work-item.flip {
+  grid-template-columns: minmax(0, 1.26fr) minmax(0, 0.74fr);
+}
+
+.work-item.flip .work-copy {
+  order: 2;
+}
+
+.work-no {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.work-no span {
+  font-size: clamp(54px, 5.4vw, 88px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.work-no i {
+  width: 44px;
+  height: 1px;
+  background: var(--ink-3);
+  opacity: 0.5;
+}
+
+.work-no b {
+  font: 700 13px var(--mono);
+  letter-spacing: 0.22em;
+  color: var(--ink-2);
+}
+
+.work-name {
+  font: 700 13px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.work-headline {
+  margin-top: 12px;
+  font-size: clamp(27px, 2.75vw, 44px);
+  line-height: 1.24;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.work-headline span {
+  display: block;
+}
+
+.work-one {
+  margin-top: 22px;
+  max-width: 440px;
+  font-size: 16px;
+  color: var(--ink-2);
+}
+
+.work-metric {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  max-width: 440px;
+}
+
+.work-metric small {
+  display: block;
+  font: 700 11px var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.work-metric strong {
+  display: block;
+  margin-top: 6px;
+  font-size: clamp(24px, 2.3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+
+.work-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.work-role {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.work-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 34px;
+}
+
+.cta-link,
+.cta-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  transition: transform 0.35s var(--ease), background 0.35s, box-shadow 0.4s var(--ease), border-color 0.3s;
+}
+
+.cta-link {
+  background: var(--ink);
+  color: #fff;
+  background-image: linear-gradient(110deg, var(--ink) 40%, color-mix(in srgb, var(--accent) 70%, var(--ink)) 100%);
+  background-size: 220% 100%;
+  background-position: 0 0;
+}
+
+.cta-link svg,
+.cta-demo svg {
+  transition: transform 0.35s var(--ease);
+}
+
+.cta-link:hover {
+  background-position: 100% 0;
+  box-shadow: 0 16px 34px -14px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.cta-link:hover svg {
+  transform: translateX(5px);
+}
+
+.cta-demo {
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: color-mix(in srgb, var(--accent) 82%, var(--ink));
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+.cta-demo:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.cta-demo:hover svg {
+  transform: translate(3px, -3px);
+}
+
+/* visual */
+.work-visual {
+  position: relative;
+}
+
+.work-visual::before {
+  content: "";
+  position: absolute;
+  inset: -16% -10%;
+  z-index: 0;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 24%, transparent), transparent 72%);
+  transition: transform 0.9s var(--ease), opacity 0.6s;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.work-item:hover .work-visual::before {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.work-visual > * {
+  position: relative;
+  z-index: 1;
+}
+
+.work-frame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(11, 20, 35, 0.09);
+  box-shadow: 0 50px 90px -40px rgba(11, 20, 35, 0.4), 0 10px 24px -12px rgba(11, 20, 35, 0.15);
+  transition: transform 0.8s var(--ease), box-shadow 0.8s var(--ease);
+}
+
+.work-frame img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.work-frame:hover {
+  transform: scale(1.018);
+  box-shadow: 0 60px 110px -40px color-mix(in srgb, var(--accent) 55%, rgba(11, 20, 35, 0.4)), 0 12px 28px -12px rgba(11, 20, 35, 0.2);
+}
+
+.spot {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(420px circle at var(--px, 50%) var(--py, 50%), rgba(255, 255, 255, 0.2), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.work-frame:hover .spot {
+  opacity: 1;
+}
+
+.work-visual .image-note {
+  margin-top: 14px;
+}
+
+/* connection to the next product */
+.handoff {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: clamp(40px, 5vw, 72px);
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.handoff i {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ink-3) 40%, var(--ink-3));
+  opacity: 0.4;
+  max-width: 240px;
+}
+
+.handoff span {
+  white-space: nowrap;
+}
+
+.handoff b {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* dark(showreel) -> light bridge lives on .showreel::after; light -> dark bridge sits on .story.dark::before */
+
+@media (max-width: 1020px) {
+  .work-item,
+  .work-item.flip {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .work-item.flip .work-copy {
+    order: 0;
+  }
+
+  .work-list {
+    gap: 110px;
+    margin-top: 64px;
+  }
+
+  .handoff {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .handoff i {
+    display: none;
+  }
+
+  .handoff span {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 640px) {
+  .work-no span {
+    font-size: 52px;
+  }
+
+  .work-cta {
+    gap: 10px;
+  }
+
+  .cta-link,
+  .cta-demo {
+    padding: 13px 20px;
+  }
+
+  .work-frame {
+    border-radius: 14px;
+  }
+}

@@ -3,13 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seungho Choi — Product · Operations · Retail · Automation</title>
     <meta
       name="description"
-      content="최승호 포트폴리오. 리테일 현장의 문제를 데이터와 제품으로 해결하는 Product, Operations, Retail, Developer 경험을 소개합니다."
+      content="현장의 문제를 데이터와 제품으로 해결합니다. 리테일 현장에서 발견한 비효율을 직접 만든 시스템으로 운영까지 연결해온 최승호의 포트폴리오."
     />
+    <link rel="canonical" href="https://seungho-choi-portfolio.vercel.app/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#07111f" />
-    <title>Seungho Choi Portfolio</title>
+    <meta name="theme-color" content="#050b16" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Seungho Choi" />
+    <meta property="og:title" content="Seungho Choi — Product · Operations · Retail · Automation" />
+    <meta property="og:description" content="현장의 문제를 데이터와 제품으로 해결합니다. 검품 시스템부터 Dashboard, 보고서 자동화, 통합 운영 플랫폼까지." />
+    <meta property="og:url" content="https://seungho-choi-portfolio.vercel.app/" />
+    <meta property="og:image" content="https://seungho-choi-portfolio.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="SEUNGHO CHOI — 현장의 문제를 데이터와 제품으로 해결합니다." />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Seungho Choi — Product · Operations · Retail · Automation" />
+    <meta name="twitter:description" content="현장의 문제를 데이터와 제품으로 해결합니다." />
+    <meta name="twitter:image" content="https://seungho-choi-portfolio.vercel.app/og-image.png" />
+
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="/screens/inspection-dashboard-1280w.webp"
+      imagesrcset="/screens/inspection-dashboard-640w.webp 640w, /screens/inspection-dashboard-1280w.webp 1280w, /screens/inspection-dashboard.webp 2400w"
+      imagesizes="(min-width: 1280px) 760px, 90vw"
+    />
+    <script>
+      // Clean case-study paths (/projects/inspection-app) map onto the hash router.
+      (function () {
+        var m = location.pathname.match(/^\/projects\/([\w-]+)\/?$/);
+        if (m) location.replace("/#/projects/" + m[1]);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
