@@ -51,9 +51,9 @@ export default function ExperiencePage() {
                 </ul>
                 <div className="career-cols">
                   <div>
-                    <h4>Role</h4>
+                    <h4 aria-level={3}>Role</h4>
                     <ul className="chip-list">{career.role.map((r) => <li key={r}>{r}</li>)}</ul>
-                    <h4>Built / Owned</h4>
+                    <h4 aria-level={3}>Built / Owned</h4>
                     <ul className="chip-list outline">{career.built.map((b) => <li key={b}>{b}</li>)}</ul>
                   </div>
                   <ul className="check-list">

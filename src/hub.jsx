@@ -5,7 +5,7 @@ import { careers, projects } from "./data";
 import { ContactBlock } from "./contact";
 import { HeroScene } from "./hero";
 import { TLink } from "./transition";
-import { CountUp, Magnetic, Reveal, Shot, useDocTitle, useHoverCapable, usePointerVars } from "./ui";
+import { CountUp, Ko, Magnetic, Reveal, Shot, useDocTitle, useHoverCapable, usePointerVars } from "./ui";
 import "./hero.css";
 import "./hub.css";
 
@@ -65,7 +65,7 @@ function KeyImpact() {
       <div className="wrap">
         <dl className="hero-kpi">
           <div className="kpi-item">
-            <dt>검품률</dt>
+            <dt><Ko>검품률</Ko></dt>
             <dd className="kpi-value">
               <span>3~5%</span>
               <ArrowRight size={20} className="kpi-arrow" aria-hidden="true" />
@@ -73,7 +73,7 @@ function KeyImpact() {
             </dd>
           </div>
           <div className="kpi-item">
-            <dt>업무시간 절감</dt>
+            <dt><Ko>업무시간 절감</Ko></dt>
             <dd className="kpi-value">
               <span>−</span>
               <span className="blue"><CountUp to={4} /></span>
@@ -207,7 +207,7 @@ function Portal({ p }) {
           <em>{p.sub}</em>
           <span className="portal-meta">
             {p.meta.map((m) => (
-              <b key={m}>{m}</b>
+              <b key={m}><Ko>{m}</Ko></b>
             ))}
           </span>
           <span className="portal-cta">

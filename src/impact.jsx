@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { emartData, gsData } from "./data";
 import { InspectionRateChart, OpeningNodes, RankChart, SalesChart, SavedHours } from "./charts";
 import { PortalHero } from "./pagehero";
-import { Reveal, useDocTitle } from "./ui";
+import { Ko, Reveal, useDocTitle } from "./ui";
 import "./story.css";
 
 // Charts keep their full behaviour: first-view draw, desktop hover replay (throttled), custom tooltips,
@@ -21,7 +21,7 @@ function Stage({ no, kicker, tone, flip, big, label, text, extra, children }) {
               <b>{kicker}</b>
             </p>
             <h2 className="imp-big">{big}</h2>
-            <p className="imp-label">{label}</p>
+            <p className="imp-label"><Ko>{label}</Ko></p>
             <p className="imp-text">{text}</p>
             {extra}
           </Reveal>

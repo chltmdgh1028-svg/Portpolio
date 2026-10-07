@@ -234,7 +234,7 @@ export function RankChart({ tone }) {
         : null;
 
   return (
-    <div className="chart rank" data-tone={tone} data-hover={active ?? ""} data-state={run ? "play" : "idle"} ref={ref} onPointerEnter={onPointerEnter} onClick={() => setActive(null)} role="img" aria-label={`피자 구독권 순위 ${from}위에서 ${to}위로 상승`}>
+    <div className="chart rank" data-tone={tone} data-hover={active ?? ""} data-state={run ? "play" : "idle"} ref={ref} onPointerEnter={onPointerEnter} onClick={() => setActive(null)} role="group" aria-label={`피자 구독권 순위 ${from}위에서 ${to}위로 상승`}>
       <div className="rank-now" aria-hidden="true">
         <small>RANK</small>
         <strong>

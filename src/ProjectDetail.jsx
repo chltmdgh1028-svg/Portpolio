@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Lock } from "lucide-react";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { projectPath, projects } from "./data";
 import { TLink } from "./transition";
-import { ClipReveal, Reveal, Shot, scrollToSection } from "./ui";
+import { ClipReveal, Ko, Reveal, Shot, scrollToSection } from "./ui";
 import "./detail.css";
 
 const CHAPTERS = [
@@ -49,7 +49,13 @@ function useActiveChapter(keys) {
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const index = Math.max(0, projects.findIndex((item) => item.id === id));
+  // an unknown id goes back to the project list instead of showing the wrong case
+  if (!projects.some((item) => item.id === id)) return <Navigate to="/main/work" replace />;
+  return <ProjectCase id={id} />;
+}
+
+function ProjectCase({ id }) {
+  const index = projects.findIndex((item) => item.id === id);
   const project = projects[index];
   const next = projects[(index + 1) % projects.length];
   const [lightboxIndex, setLightboxIndex] = useState(-1);
@@ -116,7 +122,7 @@ export default function ProjectDetail() {
         return (
           <>
             <p className="cs-metric">
-              <small>{project.resultLabel}</small>
+              <small><Ko>{project.resultLabel}</Ko></small>
               <strong>{project.resultValue}</strong>
             </p>
             <List items={project.metrics} />
@@ -217,7 +223,7 @@ export default function ProjectDetail() {
                   <header>
                     <span>{String(i + 1).padStart(2, "0")}</span>
                     <h2>
-                      {c.title} <small>{c.ko}</small>
+                      {c.title} <small><Ko>{c.ko}</Ko></small>
                     </h2>
                   </header>
                   <div className="cs-ch-body">{renderChapter(c.key)}</div>

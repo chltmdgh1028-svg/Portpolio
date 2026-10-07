@@ -4,6 +4,14 @@ import { animate, motion, useInView, useReducedMotion } from "framer-motion";
 // One easing for the whole site (page, charts, reveals) so the motion language stays consistent.
 export const EASE = [0.22, 1, 0.36, 1];
 
+// Hangul runs inside tracked (letter-spaced) Latin labels: tracking is a Latin-caps device and makes Korean look loose,
+// so each run gets its own element (bdi: no stylesheet rule targets it, unlike span) with letter-spacing 0 (see .ko in base.css). Non-string children pass through.
+const HANGUL_RUN = /([ㄱ-ㆎ가-힣]+(?:[  ]+[ㄱ-ㆎ가-힣]+)*)/;
+export function Ko({ children }) {
+  if (typeof children !== "string") return children;
+  return children.split(HANGUL_RUN).map((part, i) => (i % 2 ? <bdi className="ko" key={i}>{part}</bdi> : part));
+}
+
 /** Responsive webp: /screens/x.webp has -640w and -1280w siblings next to the 2400w original. */
 export function Shot({ src, alt, sizes, className, eager = false, ...rest }) {
   const base = src.replace(/\.webp$/, "");

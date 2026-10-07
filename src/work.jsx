@@ -3,7 +3,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import { ArrowRight, ArrowUpRight, Lock } from "lucide-react";
 import { projectPath, projectStory, projects } from "./data";
 import { TLink } from "./transition";
-import { ClipReveal, Reveal, Shot, useHoverCapable, usePointerVars } from "./ui";
+import { ClipReveal, Ko, Reveal, Shot, useHoverCapable, usePointerVars } from "./ui";
 
 function WorkItem({ project, index }) {
   const ref = useRef(null);
@@ -25,7 +25,7 @@ function WorkItem({ project, index }) {
         </Reveal>
         <Reveal delay={0.05}>
           <p className="work-name">{project.english}</p>
-          <h3 className="work-headline">
+          <h3 className="work-headline" aria-level={2}>
             {project.headline.map((line) => (
               <span key={line}>{line}</span>
             ))}
@@ -34,7 +34,7 @@ function WorkItem({ project, index }) {
         <Reveal delay={0.1}>
           <p className="work-one">{project.oneLine}</p>
           <div className="work-metric">
-            <small>{project.resultLabel}</small>
+            <small><Ko>{project.resultLabel}</Ko></small>
             <strong>{project.resultValue}</strong>
           </div>
           <p className="work-meta">

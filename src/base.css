@@ -17,7 +17,9 @@
   --wrap: 1320px;
   --gutter: clamp(20px, 4vw, 48px);
   --header-h: 72px;
-  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  /* Latin mono labels. None of these mono faces has Hangul, so Pretendard sits after the mono faces and generic
+     "monospace": Latin keeps the mono look, Korean is drawn by the site's own Korean font instead of a per-OS fallback. */
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace, "Pretendard Variable", Pretendard;
   color-scheme: light;
 }
 
@@ -43,6 +45,13 @@ body {
   word-break: keep-all;
   overflow-wrap: break-word;
   overflow-x: clip;
+}
+
+/* Korean run inside a mono / tracked Latin label (see Ko in ui.jsx): site Korean font for the whole run
+   (spaces included), no Latin tracking */
+.ko {
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  letter-spacing: 0;
 }
 
 img {

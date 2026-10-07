@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { projectPath, projects, showreel } from "./data";
 import { TLink } from "./transition";
 import { useReducedMotion } from "framer-motion";
-import { Shot } from "./ui";
+import { Ko, Shot } from "./ui";
 
 const byId = Object.fromEntries(projects.map((p) => [p.id, p]));
 
@@ -348,14 +348,16 @@ export function Showreel() {
         </div>
         <button type="button" className="reel-arrow prev" aria-label="이전 화면" onClick={() => rail.current.nudge(-1)}>
           <ArrowLeft size={18} aria-hidden="true" />
-          <span aria-hidden="true">이전 화면</span>
+          <span aria-hidden="true"><Ko>이전 화면</Ko></span>
         </button>
         <button type="button" className="reel-arrow next" aria-label="다음 화면" onClick={() => rail.current.nudge(1)}>
-          <span aria-hidden="true">다음 화면</span>
+          <span aria-hidden="true"><Ko>다음 화면</Ko></span>
           <ArrowRight size={18} aria-hidden="true" />
         </button>
       </div>
-      <p className="wrap reel-note">SANITIZED DEMO DATA · UI SHOWN WITH MOCK DATA — 실제 운영 데이터와 운영 서비스 주소는 공개하지 않습니다.</p>
+      <p className="wrap reel-note">
+        SANITIZED DEMO DATA · UI SHOWN WITH MOCK DATA — <Ko>실제 운영 데이터와 운영 서비스 주소는 공개하지 않습니다.</Ko>
+      </p>
     </section>
   );
 }
